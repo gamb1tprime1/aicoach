@@ -1,0 +1,74 @@
+﻿[
+  {
+    "id": "ielts-w2-001",
+    "exam": "IELTS",
+    "section": "Writing Task 2",
+    "difficulty": "band6",
+    "prompt": "Some people believe that unpaid community service should be a compulsory part of high school programmes. To what extent do you agree or disagree?",
+    "meta": { "min_words": 250, "time_minutes": 40, "topic": "education" }
+  },
+  {
+    "id": "ielts-w2-002",
+    "exam": "IELTS",
+    "section": "Writing Task 2",
+    "difficulty": "band7",
+    "prompt": "In many countries, the gap between the rich and the poor is widening. What problems does this cause, and what solutions can you suggest?",
+    "meta": { "min_words": 250, "time_minutes": 40, "topic": "society" }
+  },
+  {
+    "id": "ielts-w2-003",
+    "exam": "IELTS",
+    "section": "Writing Task 2",
+    "difficulty": "band8",
+    "prompt": "Some argue that technological progress makes our lives more complex rather than simpler. To what extent do you agree or disagree with this view?",
+    "meta": { "min_words": 250, "time_minutes": 40, "topic": "technology" }
+  },
+  {
+    "id": "ielts-w2-004",
+    "exam": "IELTS",
+    "section": "Writing Task 2",
+    "difficulty": "band9",
+    "prompt": "Governments should prioritise funding for public transport over the construction of new roads. To what extent do you agree or disagree?",
+    "meta": { "min_words": 250, "time_minutes": 40, "topic": "urban planning" }
+  },
+  {
+    "id": "ielts-w1-001",
+    "exam": "IELTS",
+    "section": "Writing Task 1",
+    "difficulty": "band6",
+    "prompt": "The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.",
+    "meta": { "min_words": 150, "time_minutes": 20, "topic": "chart" }
+  },
+  {
+    "id": "ielts-r-001",
+    "exam": "IELTS",
+    "section": "Reading",
+    "difficulty": "band6",
+    "prompt": "Passage: The history of the bicycle. Answer questions 1-13 based on the passage.",
+    "meta": { "questions": 13, "time_minutes": 20 }
+  },
+  {
+    "id": "ielts-r-014",
+    "exam": "IELTS",
+    "section": "Reading",
+    "difficulty": "band8",
+    "prompt": "Passage: The role of urban beekeeping in modern cities. Answer questions 1-13 based on the passage.",
+    "meta": { "questions": 13, "time_minutes": 20 }
+  },
+  {
+    "id": "ielts-l-001",
+    "exam": "IELTS",
+    "section": "Listening",
+    "difficulty": "band6",
+    "prompt": "Section 1: A conversation between a customer and a travel agent about booking a holiday. Answer questions 1-10.",
+    "meta": { "questions": 10, "time_minutes": 10 }
+  },
+  {
+    "id": "ielts-s-001",
+    "exam": "IELTS",
+    "section": "Speaking Part 2",
+    "difficulty": "band7",
+    "prompt": "Describe a skill you would like to learn. You should say: what the skill is, why you want to learn it, how you would learn it, and explain how this skill would be useful to you.",
+    "meta": { "time_minutes": 2, "prep_minutes": 1 }
+  }
+]

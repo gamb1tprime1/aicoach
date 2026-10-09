@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="title">AI Coach — IELTS / SAT / Поступление</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="lang-switch">
+      <button class="lang" data-lang="ru">🌐 RU</button>
+      <button class="lang" data-lang="en">🌐 EN</button>
+    </div>
+    <h1 data-i18n="header_title">🎓 AI Coach</h1>
+    <p data-i18n="header_sub">Подготовка к IELTS / SAT, эссе, портфолио, поступление за границу</p>
+  </header>
+
+  <nav>
+    <button class="tab active" data-tab="tasks" data-i18n="tab_tasks">📚 Задания</button>
+    <button class="tab" data-tab="essay" data-i18n="tab_essay">✍️ Эссе-коуч</button>
+    <button class="tab" data-tab="plan" data-i18n="tab_plan">🗓 План тренировок</button>
+    <button class="tab" data-tab="portfolio" data-i18n="tab_portfolio">🎯 Портфолио</button>
+  </nav>
+
+  <!-- Задания -->
+  <section id="tab-tasks" class="panel active">
+    <h2 data-i18n="tasks_h2">Задания IELTS / SAT</h2>
+    <label><span data-i18n="exam">Экзамен</span>:
+      <select id="exam">
+        <option value="IELTS">IELTS</option>
+        <option value="SAT">SAT</option>
+      </select>
+    </label>
+    <label><span data-i18n="section">Секция</span>:
+      <input id="section" placeholder="Writing Task 2 / Math / Reading">
+    </label>
+    <label><span data-i18n="difficulty">Сложность</span>:
+      <input id="difficulty" placeholder="band7 / band9 ...">
+    </label>
+    <button onclick="loadTasks()" data-i18n="btn_get">Получить</button>
+    <div id="tasks"></div>
+  </section>
+
+  <!-- Эссе -->
+  <section id="tab-essay" class="panel">
+    <h2 data-i18n="essay_h2">Разбор эссе (без написания за вас)</h2>
+    <label><span data-i18n="university">Университет</span>: <input id="uni" value="University of Toronto"></label>
+    <label><span data-i18n="essay_type">Тип эссе</span>:
+      <select id="essayType">
+        <option>Personal Statement</option>
+        <option>IELTS Task 2</option>
+        <option>SAT Essay</option>
+        <option>Supplemental Essay</option>
+      </select>
+    </label>
+    <label><span data-i18n="prompt">Промпт</span>: <input id="prompt" value="Why do you want to study CS?"></label>
+    <label data-i18n="draft">Черновик</label>
+    <textarea id="draft" rows="8" placeholder="Вставь свой черновик..."></textarea>
+    <button onclick="coachEssay()" data-i18n="btn_analyze">Разобрать</button>
+    <div id="essayOut"></div>
+  </section>
+
+  <!-- План -->
+  <section id="tab-plan" class="panel">
+    <h2 data-i18n="plan_h2">Индивидуальный план тренировок</h2>
+    <label><span data-i18n="exam">Экзамен</span>:
+      <select id="pExam">
+        <option>IELTS</option>
+        <option>SAT</option>
+      </select>
+    </label>
+    <label><span data-i18n="target_score">Целевой балл</span>: <input id="pScore" type="number" step="0.5" value="8.0"></label>
+    <label><span data-i18n="current_level">Текущий уровень</span>: <input id="pLevel" value="band6.5"></label>
+    <label><span data-i18n="native_lang">Родной язык</span>: <input id="pNative" value="Russian"></label>
+    <label><span data-i18n="weeks">Недель</span>: <input id="pWeeks" type="number" value="12"></label>
+    <label><span data-i18n="hours">Часов в неделю</span>: <input id="pHours" type="number" value="8"></label>
+    <button onclick="makePlan()" data-i18n="btn_make_plan">Составить план</button>
+    <div id="planOut"></div>
+  </section>
+
+  <!-- Портфолио -->
+  <section id="tab-portfolio" class="panel">
+    <h2 data-i18n="portfolio_h2">Портфолио для поступления</h2>
+    <label><span data-i18n="major">Специальность</span>: <input id="pfMajor" value="Computer Science"></label>
+    <label><span data-i18n="universities">Вузы (через запятую)</span>:
+      <input id="pfUnis" value="University of Toronto, MIT, ETH Zurich">
+    </label>
+    <label><span data-i18n="target_exam">Целевой экзамен</span>:
+      <select id="pfExam">
+        <option>IELTS</option>
+        <option>SAT</option>
+      </select>
+    </label>
+    <label><span data-i18n="target_score">Целевой балл</span>: <input id="pfScore" type="number" step="0.5" value="8.5"></label>
+    <label><span data-i18n="weeks_to_deadline">Недель до дедлайна</span>: <input id="pfWeeks" type="number" value="24"></label>
+    <button onclick="buildPortfolio()" data-i18n="btn_build_portfolio">Собрать план портфолио</button>
+    <div id="pfOut"></div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

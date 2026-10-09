@@ -1,0 +1,66 @@
+﻿[
+  {
+    "id": "sat-math-001",
+    "exam": "SAT",
+    "section": "Math",
+    "difficulty": "easy",
+    "prompt": "If 3x + 5 = 20, what is the value of 6x + 10?",
+    "meta": { "answers": [30], "time_seconds": 90, "topic": "algebra" }
+  },
+  {
+    "id": "sat-math-002",
+    "exam": "SAT",
+    "section": "Math",
+    "difficulty": "medium",
+    "prompt": "A line passes through the points (2, 5) and (6, 13). What is the slope of the line?",
+    "meta": { "answers": [2], "time_seconds": 90, "topic": "linear equations" }
+  },
+  {
+    "id": "sat-math-003",
+    "exam": "SAT",
+    "section": "Math",
+    "difficulty": "hard",
+    "prompt": "In a right triangle, the length of one leg is 7 and the hypotenuse is 25. What is the length of the other leg?",
+    "meta": { "answers": [24], "time_seconds": 120, "topic": "geometry" }
+  },
+  {
+    "id": "sat-math-004",
+    "exam": "SAT",
+    "section": "Math",
+    "difficulty": "hard",
+    "prompt": "If f(x) = 2x^2 - 3x + 1, what is the value of f(-2)?",
+    "meta": { "answers": [15], "time_seconds": 120, "topic": "functions" }
+  },
+  {
+    "id": "sat-rw-001",
+    "exam": "SAT",
+    "section": "Reading and Writing",
+    "difficulty": "easy",
+    "prompt": "Read the passage and choose the best answer. The scientist discovery was ____; it changed the entire field overnight. Which word best completes the sentence? A) trivial B) revolutionary C) mundane D) predictable",
+    "meta": { "answers": ["B"], "time_seconds": 60, "topic": "vocabulary in context" }
+  },
+  {
+    "id": "sat-rw-002",
+    "exam": "SAT",
+    "section": "Reading and Writing",
+    "difficulty": "medium",
+    "prompt": "Which choice completes the text so that it conforms to the conventions of Standard English? The team of researchers, along with their advisor, ____ presenting the findings at the conference. A) are B) is C) were D) have been",
+    "meta": { "answers": ["B"], "time_seconds": 75, "topic": "grammar" }
+  },
+  {
+    "id": "sat-rw-003",
+    "exam": "SAT",
+    "section": "Reading and Writing",
+    "difficulty": "hard",
+    "prompt": "Read the passage about the history of cartography. Which choice best describes the function of the underlined sentence in the overall structure of the passage? A) It introduces a counterargument B) It provides a specific example C) It draws a conclusion D) It shifts the focus to a new topic",
+    "meta": { "answers": ["B"], "time_seconds": 90, "topic": "rhetoric" }
+  },
+  {
+    "id": "sat-rw-004",
+    "exam": "SAT",
+    "section": "Reading and Writing",
+    "difficulty": "hard",
+    "prompt": "The following text is from a 19th-century novel. Based on the passage, which choice best describes the narrator attitude toward the protagonist? A) Admiring B) Critical C) Indifferent D) Ambivalent",
+    "meta": { "answers": ["A"], "time_seconds": 90, "topic": "literature" }
+  }
+]

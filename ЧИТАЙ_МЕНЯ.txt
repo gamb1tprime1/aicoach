@@ -1,0 +1,21 @@
+# AI Coach — состояние проекта
+
+## Где что лежит
+- Проект: C:\dev\aicoach
+- Исходники C++: C:\dev\aicoach\src
+- Заголовки: C:\dev\aicoach\include
+- Фронт: C:\dev\aicoach\frontend
+- Задания: C:\dev\aicoach\data\tasks
+- Бинарник: C:\dev\aicoach\build\aicoach.exe
+
+## Что работает
+- Все четыре вкладки: Задания, Эссе-коуч, План, Портфолио
+- LLM: Ollama (локально), порт 11434
+- Модели: qwen2.5:3b, qwen2.5:7b, llama3.1:latest
+- GPU: NVIDIA RTX 5060 8GB, Ollama работает на 100% GPU
+
+## Известные проблемы
+- qwen2.5:3b ставит точки вместо запятых в JSON → нужна 7B
+- Проверяем 7B: не влезает ли в VRAM, валидный ли JSON
+
+## Как запустить сервер (PowerShell)
