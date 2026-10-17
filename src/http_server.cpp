@@ -68,6 +68,7 @@ void ApiServer::run() {
         e.prompt     = body.value("prompt", "");
         e.draft      = body.value("draft", "");
         e.essay_type = body.value("essay_type", "Personal Statement");
+        e.lang = body.value("lang", "en");
 
         try {
             auto result = essay_.analyze(e);
@@ -91,6 +92,7 @@ void ApiServer::run() {
         u.major           = body.value("major", "");
         u.weeks_available = body.value("weeks_available", 12);
         u.hours_per_week  = body.value("hours_per_week", 6.0);
+        u.lang = body.value("lang", "en");
         if (body.contains("universities"))
             for (auto& x : body["universities"]) u.universities.push_back(x);
 
@@ -122,6 +124,7 @@ void ApiServer::run() {
         u.current_level   = body.value("current_level", "");
         u.weeks_available = body.value("weeks_available", 12);
         u.hours_per_week  = body.value("hours_per_week", 6.0);
+        u.lang = body.value("lang", "en");
 
         std::vector<Task> weak;
         if (body.contains("weak_spots")) {

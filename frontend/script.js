@@ -124,29 +124,20 @@ function setLang(lang) {
   localStorage.setItem("lang", lang);
   document.documentElement.lang = lang;
 
-  // Текст
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     if (translations[lang][key]) el.textContent = translations[lang][key];
   });
 
-  // Placeholder
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (translations[lang][key]) el.placeholder = translations[lang][key];
   });
 
-  // Активная кнопка
   const btnRu = document.getElementById("btn-ru");
   const btnEn = document.getElementById("btn-en");
   if (btnRu) btnRu.classList.toggle("active", lang === "ru");
   if (btnEn) btnEn.classList.toggle("active", lang === "en");
-
-  // Перерисовать уже показанные карточки, если они есть
-  const tasksBox = document.getElementById("tasks");
-  if (tasksBox && tasksBox.children.length > 0) {
-    // не перерисовываем, чтобы не делать повторный запрос
-  }
 }
 
 // ============================================================
@@ -243,6 +234,7 @@ function renderText(title, text) {
   box.appendChild(p);
   return box;
 }
+
 function renderObject(title, obj) {
   const box = el("div", "card");
   box.appendChild(el("h3", null, title));
@@ -288,7 +280,7 @@ async function loadTasks() {
       const box = el("div", "card");
       box.appendChild(el("h3", null, item.section + " [" + item.difficulty + "]"));
       box.appendChild(el("p", null, item.prompt));
-            if (item.meta) {
+      if (item.meta) {
         const m = item.meta;
         const parts = [];
         if (m.topic)        parts.push("📌 " + m.topic);
@@ -316,7 +308,8 @@ async function coachEssay() {
       university: document.getElementById("uni").value,
       essay_type: document.getElementById("essayType").value,
       prompt: document.getElementById("prompt").value,
-      draft: document.getElementById("draft").value
+      draft: document.getElementById("draft").value,
+      lang: currentLang
     });
     out.innerHTML = "";
     if (data.error) {
@@ -350,7 +343,8 @@ async function makePlan() {
       current_level: document.getElementById("pLevel").value,
       native_language: document.getElementById("pNative").value,
       weeks_available: parseInt(document.getElementById("pWeeks").value),
-      hours_per_week: parseFloat(document.getElementById("pHours").value)
+      hours_per_week: parseFloat(document.getElementById("pHours").value),
+      lang: currentLang
     });
     out.innerHTML = "";
     if (data.error) {
@@ -379,7 +373,8 @@ async function buildPortfolio() {
       universities: unis,
       target_exam: document.getElementById("pfExam").value,
       target_score: parseFloat(document.getElementById("pfScore").value),
-      weeks_available: parseInt(document.getElementById("pfWeeks").value)
+      weeks_available: parseInt(document.getElementById("pfWeeks").value),
+      lang: currentLang
     });
     out.innerHTML = "";
     if (data.error) {

@@ -4,17 +4,31 @@
 using json = nlohmann::json;
 
 PortfolioPlan PortfolioBuilder::build(const UserProfile& u, const json& uni_req) const {
-    const std::string system =
-        "You are a study-abroad admissions consultant. "
-        "Build an individual portfolio plan: academic achievements, "
-        "extracurricular activities, volunteering, olympiads, research, summer schools, "
-        "letters, recommendations, deadlines. Account for specific university requirements. "
-        "You MUST respond ONLY with valid JSON. No markdown, no backticks, no commentary. "
-        "Your response must start with '{' and end with '}'. "
-        "Use ONLY these English keys exactly: "
-        "{\"sections\":[strings], \"action_items\":[strings], "
-        "\"university_requirements\":{}, \"timeline\":[strings]}. "
-        "All array items must be plain strings, not objects.";
+        std::string system;
+    if (u.lang == "ru") {
+        system =
+            "Ты — консультант по поступлению в зарубежные вузы. "
+            "Составь индивидуальный план портфолио: академические достижения, "
+            "внеклассные активности, волонтёрство, олимпиады, research, летние школы, "
+            "письма, рекомендации, дедлайны. Учитывай требования конкретных вузов. "
+            "Отвечай ТОЛЬКО валидным JSON, без markdown. Начинается с '{', заканчивается на '}'. "
+            "Используй ТОЛЬКО эти ключи: "
+            "{\"sections\":[строки], \"action_items\":[строки], "
+            "\"university_requirements\":{}, \"timeline\":[строки]}. "
+            "Все элементы массивов — обычные строки. Содержимое пиши ПО-РУССКИ.";
+    } else {
+        system =
+            "You are a study-abroad admissions consultant. "
+            "Build an individual portfolio plan: academic achievements, "
+            "extracurricular activities, volunteering, olympiads, research, summer schools, "
+            "letters, recommendations, deadlines. Account for specific university requirements. "
+            "You MUST respond ONLY with valid JSON. No markdown, no backticks, no commentary. "
+            "Your response must start with '{' and end with '}'. "
+            "Use ONLY these English keys exactly: "
+            "{\"sections\":[strings], \"action_items\":[strings], "
+            "\"university_requirements\":{}, \"timeline\":[strings]}. "
+            "All array items must be plain strings, not objects.";
+    }
 
     std::string unis;
     for (auto& x : u.universities) unis += "- " + x + "\n";

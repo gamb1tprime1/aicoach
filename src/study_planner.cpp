@@ -4,17 +4,29 @@
 using json = nlohmann::json;
 
 StudyPlan StudyPlanner::make_plan(const UserProfile& u, const std::vector<Task>& weak) const {
-    const std::string system =
-        "You are an IELTS/SAT preparation methodologist. Create a weekly plan "
-        "that brings the student from their current level to the target score "
-        "(up to 9.0 IELTS). Account for native language, hours per week, and weak spots. "
-        "You MUST respond ONLY with valid JSON. No markdown, no backticks, no commentary. "
-        "Your response must start with '{' and end with '}'. "
-        "Use ONLY these English keys exactly: "
-        "{\"weekly_goals\":[strings], \"daily_tasks\":[strings], "
-        "\"resources\":[strings], \"rationale\":string}. "
-        "All array items must be plain strings, not objects.";
-
+        std::string system;
+    if (u.lang == "ru") {
+        system =
+            "Ты — методист по подготовке к IELTS/SAT. Составь понедельный план "
+            "от текущего уровня ученика до целевого балла (до 9.0 IELTS). "
+            "Учитывай родной язык, часы в неделю и слабые секции. "
+            "Отвечай ТОЛЬКО валидным JSON, без markdown. Начинается с '{', заканчивается на '}'. "
+            "Используй ТОЛЬКО эти ключи: "
+            "{\"weekly_goals\":[строки], \"daily_tasks\":[строки], "
+            "\"resources\":[строки], \"rationale\":строка}. "
+            "Все элементы массивов — обычные строки. Содержимое пиши ПО-РУССКИ.";
+    } else {
+        system =
+            "You are an IELTS/SAT preparation methodologist. Create a weekly plan "
+            "that brings the student from their current level to the target score "
+            "(up to 9.0 IELTS). Account for native language, hours per week, and weak spots. "
+            "You MUST respond ONLY with valid JSON. No markdown, no backticks, no commentary. "
+            "Your response must start with '{' and end with '}'. "
+            "Use ONLY these English keys exactly: "
+            "{\"weekly_goals\":[strings], \"daily_tasks\":[strings], "
+            "\"resources\":[strings], \"rationale\":string}. "
+            "All array items must be plain strings, not objects.";
+    }
     json weak_json = json::array();
     for (auto& t : weak) weak_json.push_back({{"id", t.id}, {"section", t.section}});
 
