@@ -13,7 +13,8 @@ ApiServer::ApiServer(const std::string& host, int port,
                      const std::string& frontend_dir)
     : host_(host), frontend_dir_(frontend_dir), port_(port),
       llm_(llm_url, llm_key, model),
-      essay_(llm_), portfolio_(llm_), planner_(llm_) {
+      essay_(llm_), portfolio_(llm_), planner_(llm_),
+      history_(data_dir + "/history.db") {
     tasks_.load_from_dir(data_dir + "/tasks");
 }
 
@@ -69,7 +70,9 @@ void ApiServer::run() {
         e.essay_type = body.value("essay_type", "Personal Statement");
 
         try {
-            send_json(res, essay_.analyze(e));
+            auto result = essay_.analyze(e);
+            history_.log(e.user_id, "essay", body, result);
+            send_json(res, result);
         } catch (std::exception& ex) {
             send_json(res, {{"error", ex.what()}}, 500);
         }
@@ -95,11 +98,13 @@ void ApiServer::run() {
 
         try {
             auto p = portfolio_.build(u, uni_req);
-            send_json(res, {
+            json response = {
                 {"sections", p.sections},
                 {"action_items", p.action_items},
                 {"university_requirements", p.university_requirements}
-            });
+            };
+            history_.log(u.user_id, "portfolio", body, response);
+            send_json(res, response);
         } catch (std::exception& ex) {
             send_json(res, {{"error", ex.what()}}, 500);
         }
@@ -129,15 +134,23 @@ void ApiServer::run() {
 
         try {
             auto plan = planner_.make_plan(u, weak);
-            send_json(res, {
+            json response = {
                 {"weekly_goals", plan.weekly_goals},
                 {"daily_tasks", plan.daily_tasks},
                 {"resources", plan.resources},
                 {"rationale", plan.rationale}
-            });
+            };
+            history_.log(u.user_id, "study_plan", body, response);
+            send_json(res, response);
         } catch (std::exception& ex) {
             send_json(res, {{"error", ex.what()}}, 500);
         }
+    });
+
+    svr.Get("/api/history", [&](const httplib::Request& req, httplib::Response& res) {
+        std::string user_id = req.has_param("user_id") ? req.get_param_value("user_id") : "u1";
+        auto items = history_.recent(user_id, 20);
+        send_json(res, {{"items", items}});
     });
 
     svr.Get("/health", [](const httplib::Request&, httplib::Response& res) {

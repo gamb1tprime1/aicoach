@@ -10,3 +10,7 @@ Makefile
 Thumbs.db
 .DS_Store
 *.gguf
+
+*.db
+*.sqlite
+*.sqlite3

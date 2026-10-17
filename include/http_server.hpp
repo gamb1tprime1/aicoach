@@ -4,6 +4,7 @@
 #include "essay_coach.hpp"
 #include "portfolio_builder.hpp"
 #include "study_planner.hpp"
+#include "history_db.hpp"
 
 class ApiServer {
 public:
@@ -23,4 +24,5 @@ private:
     EssayCoach essay_;
     PortfolioBuilder portfolio_;
     StudyPlanner planner_;
+    HistoryDB history_;
 };
