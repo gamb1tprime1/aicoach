@@ -22,6 +22,7 @@
     <button class="tab" data-tab="essay" data-i18n="tab_essay">✍️ Эссе-коуч</button>
     <button class="tab" data-tab="plan" data-i18n="tab_plan">🗓 План тренировок</button>
     <button class="tab" data-tab="portfolio" data-i18n="tab_portfolio">🎯 Портфолио</button>
+    <button class="tab" data-tab="history" data-i18n="tab_history">📜 История</button>
   </nav>
 
   <section id="tab-tasks" class="panel active">
@@ -97,6 +98,11 @@
     <label><span data-i18n="label_deadline">Недель до дедлайна</span>: <input id="pfWeeks" type="number" value="24"></label>
     <button class="action" onclick="buildPortfolio()" data-i18n="btn_portfolio">Собрать портфолио</button>
     <div id="pfOut"></div>
+  </section>
+<section id="tab-history" class="panel">
+    <h2 data-i18n="history_title">История запросов</h2>
+    <button class="action" onclick="loadHistory()" data-i18n="btn_load_history">Обновить</button>
+    <div id="historyOut"></div>
   </section>
 
   <script src="script.js?v=2"></script>

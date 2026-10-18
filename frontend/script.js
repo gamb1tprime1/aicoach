@@ -10,6 +10,14 @@ const translations = {
     tab_essay: "✍️ Эссе-коуч",
     tab_plan: "🗓 План тренировок",
     tab_portfolio: "🎯 Портфолио",
+    tab_history: "📜 История",
+    history_title: "История запросов",
+    btn_load_history: "Обновить",
+    history_empty: "Запросов ещё не было.",
+    history_essay: "Эссе",
+    history_plan: "План",
+    history_portfolio: "Портфолио",
+    history_unknown: "Другое",
     tasks_title: "Задания IELTS / SAT",
     essay_title: "Разбор эссе (без написания за вас)",
     plan_title: "Индивидуальный план тренировок",
@@ -68,6 +76,14 @@ const translations = {
     tab_essay: "✍️ Essay Coach",
     tab_plan: "🗓 Study Plan",
     tab_portfolio: "🎯 Portfolio",
+    tab_history: "📜 History",
+    history_title: "Request History",
+    btn_load_history: "Refresh",
+    history_empty: "No requests yet.",
+    history_essay: "Essay",
+    history_plan: "Plan",
+    history_portfolio: "Portfolio",
+    history_unknown: "Other",
     tasks_title: "IELTS / SAT Tasks",
     essay_title: "Essay review (no ghostwriting)",
     plan_title: "Personal study plan",
@@ -430,4 +446,115 @@ async function buildPortfolio() {
 // ============================================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================================
+// ============================================================
+// 5) ИСТОРИЯ
+// ============================================================
+async function loadHistory() {
+  const out = document.getElementById("historyOut");
+  out.innerHTML = "";
+  out.appendChild(loadingBox("loading"));
+  try {
+    const res = await fetch("/api/history?user_id=u1");
+    const data = await res.json();
+    out.innerHTML = "";
+    if (!data.items || !data.items.length) {
+      out.textContent = t("history_empty");
+      return;
+    }
+    data.items.forEach(item => {
+      const box = el("div", "card");
+
+      // Название эндпоинта
+      let epName = t("history_unknown");
+      let epIcon = "📌";
+      if (item.endpoint === "essay")          { epName = t("history_essay");     epIcon = "✍️"; }
+      else if (item.endpoint === "study_plan"){ epName = t("history_plan");      epIcon = "🗓"; }
+      else if (item.endpoint === "portfolio") { epName = t("history_portfolio"); epIcon = "🎯"; }
+
+      // Дата
+      const date = item.created_at
+        ? new Date(item.created_at * 1000).toLocaleString(currentLang === "ru" ? "ru-RU" : "en-US")
+        : "";
+
+      box.appendChild(el("h3", null, epIcon + " " + epName + "  ·  " + date));
+
+      // Что запросили — только ключевые поля
+      const req = item.request || {};
+      const reqLines = [];
+      if (req.university)    reqLines.push((currentLang === "ru" ? "🏫 Университет: " : "🏫 University: ") + req.university);
+      if (req.major)         reqLines.push((currentLang === "ru" ? "🎓 Специальность: " : "🎓 Major: ") + req.major);
+      if (req.essay_type)    reqLines.push((currentLang === "ru" ? "📝 Тип эссе: " : "📝 Essay type: ") + req.essay_type);
+      if (req.target_exam)   reqLines.push((currentLang === "ru" ? "📋 Экзамен: " : "📋 Exam: ") + req.target_exam);
+      if (req.target_score)  reqLines.push((currentLang === "ru" ? "🎯 Целевой балл: " : "🎯 Target score: ") + req.target_score);
+      if (req.exam)          reqLines.push((currentLang === "ru" ? "📋 Экзамен: " : "📋 Exam: ") + req.exam);
+      if (req.count)         reqLines.push((currentLang === "ru" ? "🔢 Количество: " : "🔢 Count: ") + req.count);
+      if (req.draft && req.draft.length > 0) {
+        const short = req.draft.length > 200 ? req.draft.slice(0, 200) + "..." : req.draft;
+        reqLines.push((currentLang === "ru" ? "📄 Черновик: " : "📄 Draft: ") + short);
+      }
+      if (req.universities && req.universities.length) {
+        reqLines.push((currentLang === "ru" ? "🏫 Вузы: " : "🏫 Universities: ") + req.universities.join(", "));
+      }
+
+      if (reqLines.length) {
+        box.appendChild(el("p", "pretty-text", reqLines.join("\n")));
+      }
+
+      // Что вернулось — компактная сводка
+      const resp = item.response || {};
+      const respLines = [];
+
+      if (resp.outline && resp.outline.length) {
+        respLines.push((currentLang === "ru" ? "📝 План: " : "📝 Outline: ") + resp.outline.length + " " +
+          (currentLang === "ru" ? "пунктов" : "items"));
+      }
+      if (resp.weekly_goals && resp.weekly_goals.length) {
+        respLines.push((currentLang === "ru" ? "🎯 Цели: " : "🎯 Weekly goals: ") + resp.weekly_goals.length + " " +
+          (currentLang === "ru" ? "шт." : "items"));
+      }
+      if (resp.daily_tasks && resp.daily_tasks.length) {
+        respLines.push((currentLang === "ru" ? "📅 Задачи: " : "📅 Daily tasks: ") + resp.daily_tasks.length + " " +
+          (currentLang === "ru" ? "шт." : "items"));
+      }
+      if (resp.sections && resp.sections.length) {
+        respLines.push((currentLang === "ru" ? "📚 Разделы: " : "📚 Sections: ") + resp.sections.length + " " +
+          (currentLang === "ru" ? "шт." : "items"));
+      }
+      if (resp.action_items && resp.action_items.length) {
+        respLines.push((currentLang === "ru" ? "✅ Действия: " : "✅ Actions: ") + resp.action_items.length + " " +
+          (currentLang === "ru" ? "шт." : "items"));
+      }
+      if (resp.tasks && resp.tasks.length) {
+        respLines.push((currentLang === "ru" ? "📚 Сгенерировано заданий: " : "📚 Generated tasks: ") + resp.tasks.length);
+      }
+      if (resp.fallback !== undefined) {
+        respLines.push((currentLang === "ru" ? "⚠️ Fallback: " : "⚠️ Fallback: ") + resp.fallback);
+      }
+
+      if (respLines.length) {
+        box.appendChild(el("p", "pretty-text", respLines.join("\n")));
+      }
+
+      // Кнопка «показать полный JSON»
+      const details = el("details");
+      const summary = el("summary", "copy", currentLang === "ru" ? "Показать полный ответ" : "Show full response");
+      summary.style.cursor = "pointer";
+      details.appendChild(summary);
+      const pre = el("pre", null, JSON.stringify(resp, null, 2));
+      pre.style.background = "#f8f9fc";
+      pre.style.padding = "10px";
+      pre.style.borderRadius = "6px";
+      pre.style.fontSize = "12px";
+      pre.style.overflow = "auto";
+      pre.style.maxHeight = "300px";
+      details.appendChild(pre);
+      box.appendChild(details);
+
+      out.appendChild(box);
+    });
+  } catch (e) {
+    out.innerHTML = "";
+    out.textContent = "❌ " + e.message;
+  }
+}
 document.addEventListener("DOMContentLoaded", () => setLang(currentLang));
