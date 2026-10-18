@@ -15,18 +15,14 @@ LLMClient::LLMClient(std::string url, std::string key, std::string model)
     : api_url_(std::move(url)), api_key_(std::move(key)), model_(std::move(model)) {}
 
 std::string LLMClient::chat(const std::string& system, const std::string& user) const {
-        json body = {
+            json body = {
         {"model", model_},
         {"messages", json::array({
             {{"role","system"},{"content",system}},
             {{"role","user"},  {"content",user}}
         })},
         {"temperature", 0.3},
-        {"max_tokens", 4000},
-        {"format", json{
-            {"type", "object"},
-            {"additionalProperties", true}
-        }}
+        {"max_tokens", 4000}
     };
 
     CURL* curl = curl_easy_init();

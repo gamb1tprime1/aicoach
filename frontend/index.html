@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Coach — IELTS / SAT / Поступление</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,7 +38,11 @@
     <label><span data-i18n="label_difficulty">Сложность</span>:
       <input id="difficulty" data-i18n-placeholder="ph_difficulty" placeholder="band7 / band9 / hard">
     </label>
+    <label><span data-i18n="label_count">Сколько</span>:
+      <input id="count" type="number" min="1" max="10" value="5">
+    </label>
     <button class="action" onclick="loadTasks()" data-i18n="btn_get_tasks">Получить</button>
+    <button class="action" onclick="generateTasks()" data-i18n="btn_generate">Сгенерировать</button>
     <div id="tasks"></div>
   </section>
 
@@ -94,6 +99,6 @@
     <div id="pfOut"></div>
   </section>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>

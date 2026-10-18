@@ -16,6 +16,7 @@ add_executable(aicoach
     src/study_planner.cpp
     src/http_server.cpp
     src/history_db.cpp
+    src/task_generator.cpp
 )
 target_link_libraries(aicoach PRIVATE
     CURL::libcurl

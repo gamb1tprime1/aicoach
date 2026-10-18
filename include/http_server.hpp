@@ -5,6 +5,7 @@
 #include "portfolio_builder.hpp"
 #include "study_planner.hpp"
 #include "history_db.hpp"
+#include "task_generator.hpp"
 
 class ApiServer {
 public:
@@ -23,6 +24,7 @@ private:
     TasksRepo tasks_;
     EssayCoach essay_;
     PortfolioBuilder portfolio_;
-    StudyPlanner planner_;
+        StudyPlanner planner_;
     HistoryDB history_;
+    TaskGenerator generator_;
 };

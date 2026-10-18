@@ -30,6 +30,8 @@ const translations = {
     label_unis: "Вузы (через запятую)",
     label_deadline: "Недель до дедлайна",
     btn_get_tasks: "Получить",
+    label_count: "Сколько",
+    btn_generate: "Сгенерировать",
     btn_analyze: "Разобрать",
     btn_plan: "Составить план",
     btn_portfolio: "Собрать портфолио",
@@ -57,7 +59,8 @@ const translations = {
     card_rationale: "Обоснование",
     card_sections: "Разделы портфолио",
     card_actions: "Что делать",
-    card_uni_req: "Требования вузов"
+    card_uni_req: "Требования вузов",
+    gen_fallback: "Модель не справилась, показаны задания из базы."
   },
   en: {
     subtitle: "Preparation for IELTS / SAT, essays, portfolio, study abroad",
@@ -85,6 +88,8 @@ const translations = {
     label_unis: "Universities (comma-separated)",
     label_deadline: "Weeks until deadline",
     btn_get_tasks: "Get tasks",
+    label_count: "Count",
+    btn_generate: "Generate",
     btn_analyze: "Analyze",
     btn_plan: "Build plan",
     btn_portfolio: "Build portfolio",
@@ -112,7 +117,8 @@ const translations = {
     card_rationale: "Rationale",
     card_sections: "Portfolio sections",
     card_actions: "Action items",
-    card_uni_req: "University requirements"
+    card_uni_req: "University requirements",
+    gen_fallback: "Model failed, showing static tasks."
   }
 };
 
@@ -257,6 +263,23 @@ function loadingBox(msgKey) {
   return box;
 }
 
+function renderTaskCard(item) {
+  const box = el("div", "card");
+  box.appendChild(el("h3", null, item.section + " [" + item.difficulty + "]"));
+  box.appendChild(el("p", null, item.prompt));
+  if (item.meta) {
+    const m = item.meta;
+    const parts = [];
+    if (m.topic)        parts.push("📌 " + m.topic);
+    if (m.min_words)    parts.push("✍️ min " + m.min_words + " words");
+    if (m.time_minutes) parts.push("⏱ " + m.time_minutes + " min");
+    if (m.questions)    parts.push("❓ " + m.questions + " questions");
+    if (m.answers)      parts.push("✓ " + JSON.stringify(m.answers));
+    if (parts.length) box.appendChild(el("small", null, parts.join("  ·  ")));
+  }
+  return box;
+}
+
 // ============================================================
 // 1) ЗАДАНИЯ
 // ============================================================
@@ -276,23 +299,38 @@ async function loadTasks() {
       out.textContent = t("nothing_found");
       return;
     }
-    data.tasks.forEach(item => {
-      const box = el("div", "card");
-      box.appendChild(el("h3", null, item.section + " [" + item.difficulty + "]"));
-      box.appendChild(el("p", null, item.prompt));
-      if (item.meta) {
-        const m = item.meta;
-        const parts = [];
-        if (m.topic)        parts.push("📌 " + m.topic);
-        if (m.min_words)    parts.push("✍️ min " + m.min_words + " words");
-        if (m.time_minutes) parts.push("⏱ " + m.time_minutes + " min");
-        if (m.questions)    parts.push("❓ " + m.questions + " questions");
-        if (m.answers)      parts.push("✓ " + JSON.stringify(m.answers));
-        if (parts.length) box.appendChild(el("small", null, parts.join("  ·  ")));
-      }
-      out.appendChild(box);
-    });
+    data.tasks.forEach(item => out.appendChild(renderTaskCard(item)));
   } catch (e) { out.textContent = "❌ " + e.message; }
+}
+
+async function generateTasks() {
+  const out = document.getElementById("tasks");
+  out.innerHTML = "";
+  out.appendChild(loadingBox("loading"));
+  try {
+    const countInput = document.getElementById("count");
+    const count = countInput ? (parseInt(countInput.value) || 5) : 5;
+    const data = await post("/api/tasks/generate", {
+      exam: document.getElementById("exam").value,
+      section: document.getElementById("section").value,
+      difficulty: document.getElementById("difficulty").value,
+      count: count,
+      lang: currentLang
+    });
+    out.innerHTML = "";
+    if (data.error) {
+      out.textContent = "❌ " + data.error;
+      return;
+    }
+    if (!data.tasks || !data.tasks.length) {
+      out.textContent = t("nothing_found");
+      return;
+    }
+    if (data.fallback) {
+      out.appendChild(el("p", "empty", t("gen_fallback")));
+    }
+    data.tasks.forEach(item => out.appendChild(renderTaskCard(item)));
+  } catch (e) { out.innerHTML = ""; out.textContent = "❌ " + e.message; }
 }
 
 // ============================================================

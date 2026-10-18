@@ -11,10 +11,11 @@ ApiServer::ApiServer(const std::string& host, int port,
                      const std::string& model,
                      const std::string& data_dir,
                      const std::string& frontend_dir)
-    : host_(host), frontend_dir_(frontend_dir), port_(port),
+        : host_(host), frontend_dir_(frontend_dir), port_(port),
       llm_(llm_url, llm_key, model),
       essay_(llm_), portfolio_(llm_), planner_(llm_),
-      history_(data_dir + "/history.db") {
+      history_(data_dir + "/history.db"),
+      generator_(llm_, tasks_) {
     tasks_.load_from_dir(data_dir + "/tasks");
 }
 
@@ -145,6 +146,37 @@ void ApiServer::run() {
             };
             history_.log(u.user_id, "study_plan", body, response);
             send_json(res, response);
+        } catch (std::exception& ex) {
+            send_json(res, {{"error", ex.what()}}, 500);
+        }
+    });
+    svr.Post("/api/tasks/generate", [&](const httplib::Request& req, httplib::Response& res) {
+        auto body = json::parse(req.body, nullptr, false);
+        if (body.is_discarded()) return send_json(res, {{"error", "bad json"}}, 400);
+
+        std::string exam       = body.value("exam", "IELTS");
+        std::string section    = body.value("section", "");
+        std::string difficulty = body.value("difficulty", "");
+        int count              = body.value("count", 5);
+        std::string lang       = body.value("lang", "en");
+
+        try {
+            auto tasks = generator_.generate(exam, section, difficulty, count, lang);
+            if (tasks.empty()) {
+                auto fallback = tasks_.pick(exam, section, difficulty, count);
+                json out = json::array();
+                for (auto& t : fallback) {
+                    out.push_back({
+                        {"id", t.id},
+                        {"section", t.section},
+                        {"difficulty", t.difficulty},
+                        {"prompt", t.prompt},
+                        {"meta", t.meta}
+                    });
+                }
+                return send_json(res, {{"tasks", out}, {"fallback", true}});
+            }
+            send_json(res, {{"tasks", tasks}, {"fallback", false}});
         } catch (std::exception& ex) {
             send_json(res, {{"error", ex.what()}}, 500);
         }
