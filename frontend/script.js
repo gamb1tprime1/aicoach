@@ -465,6 +465,42 @@ async function generateExam() {
       out.appendChild(box);
       return;
     }
+    if (data.type === "speaking") {
+      const box = el("div", "card");
+      box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
+
+      if (data.cue_card) {
+        box.appendChild(el("h3", null, "🎤 " + (currentLang === "ru" ? "Тема" : "Cue Card")));
+        box.appendChild(el("p", "pretty-text", data.cue_card));
+      }
+
+      if (data.bullets && data.bullets.length) {
+        const ul = el("ul", "pretty-list");
+        data.bullets.forEach(b => ul.appendChild(el("li", null, b)));
+        box.appendChild(ul);
+      }
+
+      if (data.questions && data.questions.length) {
+        box.appendChild(el("h3", null, "❓ " + (currentLang === "ru" ? "Вопросы" : "Questions")));
+        const ul = el("ul", "pretty-list");
+        data.questions.forEach(q => ul.appendChild(el("li", null, q)));
+        box.appendChild(ul);
+      }
+
+      if (data.time_prep || data.time_speak) {
+        const meta = [];
+        if (data.time_prep)  meta.push("⏱ " + (currentLang === "ru" ? "Подготовка: " : "Prep: ") + data.time_prep + " min");
+        if (data.time_speak) meta.push("🎤 " + (currentLang === "ru" ? "Ответ: " : "Speak: ") + data.time_speak + " min");
+        box.appendChild(el("small", null, meta.join("  ·  ")));
+      }
+
+      if (data.tips && data.tips.length) {
+        box.appendChild(renderList("💡 " + (currentLang === "ru" ? "Советы" : "Tips"), data.tips));
+      }
+
+      out.appendChild(box);
+      return;
+    }
 
     out.textContent = t("nothing_found");
   } catch (e) {

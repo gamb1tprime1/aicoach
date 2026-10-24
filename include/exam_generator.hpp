@@ -17,6 +17,11 @@ public:
                                    const std::string& difficulty,
                                    const std::string& lang) const;
 
+    nlohmann::json generateSpeaking(const std::string& exam,
+                                    const std::string& section,
+                                    const std::string& difficulty,
+                                    const std::string& lang) const;
+
 private:
     const LLMClient& llm_;
 };
