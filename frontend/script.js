@@ -1,27 +1,48 @@
 ﻿const API = "";
 
+const EXAM_DATA = {
+  IELTS_ACADEMIC: {
+    title: "IELTS Academic",
+    sections: ["Writing Task 1 (Chart)", "Writing Task 2 (Essay)", "Reading (Academic)", "Listening", "Speaking"],
+    difficulties: ["band5", "band6", "band7", "band8", "band9"]
+  },
+  IELTS_GENERAL: {
+    title: "IELTS General Training",
+    sections: ["Writing Task 1 (Letter)", "Writing Task 2 (Essay)", "Reading (General)", "Listening", "Speaking"],
+    difficulties: ["band5", "band6", "band7", "band8", "band9"]
+  },
+  TOEFL: {
+    title: "TOEFL",
+    sections: ["Reading", "Listening", "Speaking", "Writing"],
+    difficulties: ["basic", "intermediate", "advanced"]
+  },
+  SAT: {
+    title: "SAT",
+    sections: ["Reading & Writing", "Math"],
+    difficulties: ["easy", "medium", "hard"]
+  }
+};
+
+let currentExam = "IELTS";
+let ieltsVersion = "academic";
+
 // ============================================================
 // ЛОКАЛИЗАЦИЯ
 // ============================================================
 const translations = {
   ru: {
-    subtitle: "Подготовка к IELTS / SAT, эссе, портфолио, поступление за границу",
-    tab_tasks: "📚 Задания",
+    subtitle: "Подготовка к IELTS / TOEFL / SAT, эссе, портфолио, поступление за границу",
+    exam_ielts_desc: "Academic / General",
+    exam_toefl_desc: "iBT Test",
+    exam_sat_desc: "Digital SAT",
     tab_essay: "✍️ Эссе-коуч",
     tab_plan: "🗓 План тренировок",
     tab_portfolio: "🎯 Портфолио",
     tab_history: "📜 История",
-    history_title: "История запросов",
-    btn_load_history: "Обновить",
-    history_empty: "Запросов ещё не было.",
-    history_essay: "Эссе",
-    history_plan: "План",
-    history_portfolio: "Портфолио",
-    history_unknown: "Другое",
-    tasks_title: "Задания IELTS / SAT",
     essay_title: "Разбор эссе (без написания за вас)",
     plan_title: "Индивидуальный план тренировок",
     portfolio_title: "Портфолио для поступления",
+    history_title: "История запросов",
     label_exam: "Экзамен",
     label_section: "Секция",
     label_difficulty: "Сложность",
@@ -37,14 +58,13 @@ const translations = {
     label_major: "Специальность",
     label_unis: "Вузы (через запятую)",
     label_deadline: "Недель до дедлайна",
-    btn_get_tasks: "Получить",
     label_count: "Сколько",
     btn_generate: "Сгенерировать",
     btn_analyze: "Разобрать",
     btn_plan: "Составить план",
     btn_portfolio: "Собрать портфолио",
-    ph_section: "Writing Task 2 / Math / Reading",
-    ph_difficulty: "band7 / band9 / hard",
+    btn_load_history: "Обновить",
+    btn_back_to_exams: "← Назад к экзаменам",
     ph_draft: "Вставь свой черновик...",
     loading: "Загружаю...",
     analyzing: "Анализирую... (30–60 секунд)",
@@ -68,26 +88,26 @@ const translations = {
     card_sections: "Разделы портфолио",
     card_actions: "Что делать",
     card_uni_req: "Требования вузов",
-    gen_fallback: "Модель не справилась, показаны задания из базы."
+    gen_fallback: "Модель не справилась, показаны задания из базы.",
+    history_empty: "Запросов ещё не было.",
+    history_essay: "Эссе",
+    history_plan: "План",
+    history_portfolio: "Портфолио",
+    history_unknown: "Другое"
   },
   en: {
-    subtitle: "Preparation for IELTS / SAT, essays, portfolio, study abroad",
-    tab_tasks: "📚 Tasks",
+    subtitle: "Preparation for IELTS / TOEFL / SAT, essays, portfolio, study abroad",
+    exam_ielts_desc: "Academic / General",
+    exam_toefl_desc: "iBT Test",
+    exam_sat_desc: "Digital SAT",
     tab_essay: "✍️ Essay Coach",
     tab_plan: "🗓 Study Plan",
     tab_portfolio: "🎯 Portfolio",
     tab_history: "📜 History",
-    history_title: "Request History",
-    btn_load_history: "Refresh",
-    history_empty: "No requests yet.",
-    history_essay: "Essay",
-    history_plan: "Plan",
-    history_portfolio: "Portfolio",
-    history_unknown: "Other",
-    tasks_title: "IELTS / SAT Tasks",
     essay_title: "Essay review (no ghostwriting)",
     plan_title: "Personal study plan",
     portfolio_title: "Admissions portfolio",
+    history_title: "Request History",
     label_exam: "Exam",
     label_section: "Section",
     label_difficulty: "Difficulty",
@@ -103,14 +123,13 @@ const translations = {
     label_major: "Major",
     label_unis: "Universities (comma-separated)",
     label_deadline: "Weeks until deadline",
-    btn_get_tasks: "Get tasks",
     label_count: "Count",
     btn_generate: "Generate",
     btn_analyze: "Analyze",
     btn_plan: "Build plan",
     btn_portfolio: "Build portfolio",
-    ph_section: "Writing Task 2 / Math / Reading",
-    ph_difficulty: "band7 / band9 / hard",
+    btn_load_history: "Refresh",
+    btn_back_to_exams: "← Back to exams",
     ph_draft: "Paste your draft here...",
     loading: "Loading...",
     analyzing: "Analyzing... (30–60 seconds)",
@@ -134,7 +153,12 @@ const translations = {
     card_sections: "Portfolio sections",
     card_actions: "Action items",
     card_uni_req: "University requirements",
-    gen_fallback: "Model failed, showing static tasks."
+    gen_fallback: "Model failed, showing static tasks.",
+    history_empty: "No requests yet.",
+    history_essay: "Essay",
+    history_plan: "Plan",
+    history_portfolio: "Portfolio",
+    history_unknown: "Other"
   }
 };
 
@@ -163,7 +187,7 @@ function setLang(lang) {
 }
 
 // ============================================================
-// ВКЛАДКИ
+// ВКЛАДКИ (только вторичные)
 // ============================================================
 document.querySelectorAll(".tab").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -197,7 +221,7 @@ async function post(path, body) {
 }
 
 // ============================================================
-// ХЕЛПЕРЫ РЕНДЕРА
+// ХЕЛПЕРЫ
 // ============================================================
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -209,6 +233,13 @@ function el(tag, cls, text) {
 function pick(data, ...names) {
   for (const n of names) if (data[n]) return data[n];
   return null;
+}
+
+function loadingBox(msgKey) {
+  const box = el("div", "loading-box");
+  box.appendChild(el("span", "loading"));
+  box.appendChild(document.createTextNode(t(msgKey)));
+  return box;
 }
 
 function renderList(title, arr) {
@@ -252,8 +283,7 @@ function renderText(title, text) {
   });
   h.appendChild(btn);
   box.appendChild(h);
-  const p = el("p", "pretty-text", text || t("empty"));
-  box.appendChild(p);
+  box.appendChild(el("p", "pretty-text", text || t("empty")));
   return box;
 }
 
@@ -272,13 +302,6 @@ function renderObject(title, obj) {
   return box;
 }
 
-function loadingBox(msgKey) {
-  const box = el("div", "loading-box");
-  box.appendChild(el("span", "loading"));
-  box.appendChild(document.createTextNode(t(msgKey)));
-  return box;
-}
-
 function renderTaskCard(item) {
   const box = el("div", "card");
   box.appendChild(el("h3", null, item.section + " [" + item.difficulty + "]"));
@@ -290,49 +313,99 @@ function renderTaskCard(item) {
     if (m.min_words)    parts.push("✍️ min " + m.min_words + " words");
     if (m.time_minutes) parts.push("⏱ " + m.time_minutes + " min");
     if (m.questions)    parts.push("❓ " + m.questions + " questions");
-    if (m.answers)      parts.push("✓ " + JSON.stringify(m.answers));
     if (parts.length) box.appendChild(el("small", null, parts.join("  ·  ")));
   }
   return box;
 }
 
 // ============================================================
-// 1) ЗАДАНИЯ
+// ПЕРЕКЛЮЧЕНИЕ ЭКЗАМЕНОВ
 // ============================================================
-async function loadTasks() {
-  const out = document.getElementById("tasks");
-  out.innerHTML = "";
-  out.appendChild(loadingBox("loading"));
-  try {
-    const data = await post("/api/tasks", {
-      exam: document.getElementById("exam").value,
-      section: document.getElementById("section").value,
-      difficulty: document.getElementById("difficulty").value,
-      count: 20
-    });
-    out.innerHTML = "";
-    if (!data.tasks || !data.tasks.length) {
-      out.textContent = t("nothing_found");
-      return;
-    }
-    data.tasks.forEach(item => out.appendChild(renderTaskCard(item)));
-  } catch (e) { out.textContent = "❌ " + e.message; }
+function showExamPanel(exam) {
+  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("exam-panel").classList.add("active");
+  setExam(exam);
 }
 
-async function generateTasks() {
+function setExam(exam) {
+  currentExam = exam;
+
+  document.querySelectorAll(".exam-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.exam === exam);
+  });
+
+  const versionSwitcher = document.getElementById("ielts-version-switcher");
+  if (versionSwitcher) {
+    versionSwitcher.style.display = (exam === "IELTS") ? "flex" : "none";
+  }
+
+  let dataKey = exam;
+  if (exam === "IELTS") {
+    dataKey = (ieltsVersion === "academic") ? "IELTS_ACADEMIC" : "IELTS_GENERAL";
+  }
+
+  const data = EXAM_DATA[dataKey];
+
+  const title = document.getElementById("exam-title");
+  if (title) title.textContent = data.title;
+
+  const sectionSel = document.getElementById("section");
+  if (sectionSel) {
+    sectionSel.innerHTML = "";
+    data.sections.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      sectionSel.appendChild(opt);
+    });
+  }
+
+  const diffSel = document.getElementById("difficulty");
+  if (diffSel) {
+    diffSel.innerHTML = "";
+    data.difficulties.forEach(d => {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      diffSel.appendChild(opt);
+    });
+  }
+
+  const out = document.getElementById("tasks");
+  if (out) out.innerHTML = "";
+}
+
+function setIeltsVersion(version) {
+  ieltsVersion = version;
+  document.querySelectorAll(".version-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.version === version);
+  });
+  setExam("IELTS");
+}
+
+async function generateExam() {
   const out = document.getElementById("tasks");
   out.innerHTML = "";
   out.appendChild(loadingBox("loading"));
+
+  const exam       = currentExam;
+  const section    = document.getElementById("section").value;
+  const difficulty = document.getElementById("difficulty").value;
+  const countInput = document.getElementById("count");
+  const count      = countInput ? (parseInt(countInput.value) || 5) : 5;
+
   try {
-    const countInput = document.getElementById("count");
-    const count = countInput ? (parseInt(countInput.value) || 5) : 5;
-    const data = await post("/api/tasks/generate", {
-      exam: document.getElementById("exam").value,
-      section: document.getElementById("section").value,
-      difficulty: document.getElementById("difficulty").value,
+    const payload = {
+      exam: exam,
+      section: section,
+      difficulty: difficulty,
       count: count,
       lang: currentLang
-    });
+    };
+    if (exam === "IELTS") payload.ielts_version = ieltsVersion;
+
+    const data = await post("/api/tasks/generate", payload);
     out.innerHTML = "";
     if (data.error) {
       out.textContent = "❌ " + data.error;
@@ -346,7 +419,10 @@ async function generateTasks() {
       out.appendChild(el("p", "empty", t("gen_fallback")));
     }
     data.tasks.forEach(item => out.appendChild(renderTaskCard(item)));
-  } catch (e) { out.innerHTML = ""; out.textContent = "❌ " + e.message; }
+  } catch (e) {
+    out.innerHTML = "";
+    out.textContent = "❌ " + e.message;
+  }
 }
 
 // ============================================================
@@ -392,7 +468,7 @@ async function makePlan() {
   try {
     const data = await post("/api/study-plan", {
       user_id: "u1",
-      target_exam: document.getElementById("pExam").value,
+      target_exam: currentExam,
       target_score: parseFloat(document.getElementById("pScore").value),
       current_level: document.getElementById("pLevel").value,
       native_language: document.getElementById("pNative").value,
@@ -425,7 +501,7 @@ async function buildPortfolio() {
       user_id: "u1",
       major: document.getElementById("pfMajor").value,
       universities: unis,
-      target_exam: document.getElementById("pfExam").value,
+      target_exam: currentExam,
       target_score: parseFloat(document.getElementById("pfScore").value),
       weeks_available: parseInt(document.getElementById("pfWeeks").value),
       lang: currentLang
@@ -444,9 +520,6 @@ async function buildPortfolio() {
 }
 
 // ============================================================
-// ИНИЦИАЛИЗАЦИЯ
-// ============================================================
-// ============================================================
 // 5) ИСТОРИЯ
 // ============================================================
 async function loadHistory() {
@@ -463,22 +536,18 @@ async function loadHistory() {
     }
     data.items.forEach(item => {
       const box = el("div", "card");
-
-      // Название эндпоинта
       let epName = t("history_unknown");
       let epIcon = "📌";
-      if (item.endpoint === "essay")          { epName = t("history_essay");     epIcon = "✍️"; }
-      else if (item.endpoint === "study_plan"){ epName = t("history_plan");      epIcon = "🗓"; }
-      else if (item.endpoint === "portfolio") { epName = t("history_portfolio"); epIcon = "🎯"; }
+      if (item.endpoint === "essay")           { epName = t("history_essay");     epIcon = "✍️"; }
+      else if (item.endpoint === "study_plan") { epName = t("history_plan");      epIcon = "🗓"; }
+      else if (item.endpoint === "portfolio")  { epName = t("history_portfolio"); epIcon = "🎯"; }
 
-      // Дата
       const date = item.created_at
         ? new Date(item.created_at * 1000).toLocaleString(currentLang === "ru" ? "ru-RU" : "en-US")
         : "";
 
       box.appendChild(el("h3", null, epIcon + " " + epName + "  ·  " + date));
 
-      // Что запросили — только ключевые поля
       const req = item.request || {};
       const reqLines = [];
       if (req.university)    reqLines.push((currentLang === "ru" ? "🏫 Университет: " : "🏫 University: ") + req.university);
@@ -486,69 +555,7 @@ async function loadHistory() {
       if (req.essay_type)    reqLines.push((currentLang === "ru" ? "📝 Тип эссе: " : "📝 Essay type: ") + req.essay_type);
       if (req.target_exam)   reqLines.push((currentLang === "ru" ? "📋 Экзамен: " : "📋 Exam: ") + req.target_exam);
       if (req.target_score)  reqLines.push((currentLang === "ru" ? "🎯 Целевой балл: " : "🎯 Target score: ") + req.target_score);
-      if (req.exam)          reqLines.push((currentLang === "ru" ? "📋 Экзамен: " : "📋 Exam: ") + req.exam);
-      if (req.count)         reqLines.push((currentLang === "ru" ? "🔢 Количество: " : "🔢 Count: ") + req.count);
-      if (req.draft && req.draft.length > 0) {
-        const short = req.draft.length > 200 ? req.draft.slice(0, 200) + "..." : req.draft;
-        reqLines.push((currentLang === "ru" ? "📄 Черновик: " : "📄 Draft: ") + short);
-      }
-      if (req.universities && req.universities.length) {
-        reqLines.push((currentLang === "ru" ? "🏫 Вузы: " : "🏫 Universities: ") + req.universities.join(", "));
-      }
-
-      if (reqLines.length) {
-        box.appendChild(el("p", "pretty-text", reqLines.join("\n")));
-      }
-
-      // Что вернулось — компактная сводка
-      const resp = item.response || {};
-      const respLines = [];
-
-      if (resp.outline && resp.outline.length) {
-        respLines.push((currentLang === "ru" ? "📝 План: " : "📝 Outline: ") + resp.outline.length + " " +
-          (currentLang === "ru" ? "пунктов" : "items"));
-      }
-      if (resp.weekly_goals && resp.weekly_goals.length) {
-        respLines.push((currentLang === "ru" ? "🎯 Цели: " : "🎯 Weekly goals: ") + resp.weekly_goals.length + " " +
-          (currentLang === "ru" ? "шт." : "items"));
-      }
-      if (resp.daily_tasks && resp.daily_tasks.length) {
-        respLines.push((currentLang === "ru" ? "📅 Задачи: " : "📅 Daily tasks: ") + resp.daily_tasks.length + " " +
-          (currentLang === "ru" ? "шт." : "items"));
-      }
-      if (resp.sections && resp.sections.length) {
-        respLines.push((currentLang === "ru" ? "📚 Разделы: " : "📚 Sections: ") + resp.sections.length + " " +
-          (currentLang === "ru" ? "шт." : "items"));
-      }
-      if (resp.action_items && resp.action_items.length) {
-        respLines.push((currentLang === "ru" ? "✅ Действия: " : "✅ Actions: ") + resp.action_items.length + " " +
-          (currentLang === "ru" ? "шт." : "items"));
-      }
-      if (resp.tasks && resp.tasks.length) {
-        respLines.push((currentLang === "ru" ? "📚 Сгенерировано заданий: " : "📚 Generated tasks: ") + resp.tasks.length);
-      }
-      if (resp.fallback !== undefined) {
-        respLines.push((currentLang === "ru" ? "⚠️ Fallback: " : "⚠️ Fallback: ") + resp.fallback);
-      }
-
-      if (respLines.length) {
-        box.appendChild(el("p", "pretty-text", respLines.join("\n")));
-      }
-
-      // Кнопка «показать полный JSON»
-      const details = el("details");
-      const summary = el("summary", "copy", currentLang === "ru" ? "Показать полный ответ" : "Show full response");
-      summary.style.cursor = "pointer";
-      details.appendChild(summary);
-      const pre = el("pre", null, JSON.stringify(resp, null, 2));
-      pre.style.background = "#f8f9fc";
-      pre.style.padding = "10px";
-      pre.style.borderRadius = "6px";
-      pre.style.fontSize = "12px";
-      pre.style.overflow = "auto";
-      pre.style.maxHeight = "300px";
-      details.appendChild(pre);
-      box.appendChild(details);
+      if (reqLines.length) box.appendChild(el("p", "pretty-text", reqLines.join("\n")));
 
       out.appendChild(box);
     });
@@ -557,4 +564,11 @@ async function loadHistory() {
     out.textContent = "❌ " + e.message;
   }
 }
-document.addEventListener("DOMContentLoaded", () => setLang(currentLang));
+
+// ============================================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  setLang(currentLang);
+  setIeltsVersion("academic");
+});

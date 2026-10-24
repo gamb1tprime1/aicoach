@@ -1,35 +1,10 @@
-﻿
-* { box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+﻿* { box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 body { margin: 0; background: #f4f6fa; color: #1a1d24; line-height: 1.55; }
-header { background: linear-gradient(135deg, #4a6cf7, #8e44ad); color: #fff; padding: 28px 24px; text-align: center; }
+
+header { background: linear-gradient(135deg, #4a6cf7, #8e44ad); color: #fff; padding: 28px 24px; text-align: center; position: relative; }
 header h1 { margin: 0 0 6px; font-size: 28px; }
 header p { margin: 0; opacity: 0.9; font-size: 14px; }
-nav { display: flex; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
-.tab { padding: 10px 18px; border: none; background: #eef1f8; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s; }
-.tab:hover { background: #dde4f5; }
-.tab.active { background: #4a6cf7; color: #fff; }
-.panel { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
-.panel.active { display: block; }
-.panel h2 { margin-top: 0; font-size: 22px; color: #2a2e3a; }
-label { display: block; margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #444; }
-input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ccd2e0; border-radius: 8px; font-size: 14px; background: #fff; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: #4a6cf7; box-shadow: 0 0 0 3px rgba(74,108,247,0.15); }
-textarea { resize: vertical; min-height: 140px; }
-button { margin-top: 16px; padding: 12px 24px; background: #4a6cf7; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500; transition: background 0.15s; }
-button:hover { background: #3a56d4; }
-button.copy { background: #eef1f8; color: #2a2e3a; margin: 0; padding: 6px 12px; font-size: 12px; border-radius: 6px; }
-button.copy:hover { background: #dde4f5; }
-.card { background: #fff; padding: 16px 20px; border-radius: 10px; margin-top: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #4a6cf7; }
-.card h3 { margin: 0 0 10px; font-size: 16px; color: #2a2e3a; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.card ul { margin: 0; padding-left: 20px; }
-.card li { margin-bottom: 6px; }
-.card .empty { color: #999; font-style: italic; margin: 0; }
-.card small { color: #888; font-size: 12px; display: block; margin-top: 6px; }
-.loading-box { display: flex; align-items: center; color: #4a6cf7; font-weight: 500; margin-top: 16px; }
-.loading { display: inline-block; width: 16px; height: 16px; border: 2px solid #4a6cf7; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-#tasks, #essayOut, #planOut, #pfOut { margin-top: 16px; }
-/* переключатель языка */
+
 .lang-switch {
   position: absolute;
   top: 20px;
@@ -37,7 +12,6 @@ button.copy:hover { background: #dde4f5; }
   display: flex;
   gap: 4px;
 }
-header { position: relative; }
 .lang-switch button {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -48,25 +22,238 @@ header { position: relative; }
   font-size: 13px;
   font-weight: 600;
   transition: all 0.15s;
+  margin: 0;
 }
 .lang-switch button:hover { background: rgba(255, 255, 255, 0.35); }
 .lang-switch button.active { background: #fff; color: #4a6cf7; }
-/* ============================================================ */
-/* Красивые карточки */
-/* ============================================================ */
+
+/* ============== Кнопки экзаменов ============== */
+.exam-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.exam-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 16px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0;
+  color: #1a1d24;
+}
+
+.exam-btn:hover {
+  border-color: #4a6cf7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 108, 247, 0.15);
+}
+
+.exam-btn.active {
+  border-color: #4a6cf7;
+  background: linear-gradient(135deg, #eef2ff, #f4f6fa);
+  box-shadow: 0 4px 12px rgba(74, 108, 247, 0.2);
+}
+
+.exam-icon { font-size: 32px; line-height: 1; }
+.exam-name { font-size: 20px; font-weight: 700; color: #1a1d24; }
+.exam-desc { font-size: 12px; color: #888; }
+
+/* ============== Переключатель Academic / General ============== */
+.version-switcher {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 8px;
+  background: #f4f6fa;
+  border-radius: 10px;
+}
+
+.version-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s;
+  margin: 0;
+  color: #1a1d24;
+}
+
+.version-btn:hover { border-color: #4a6cf7; }
+
+.version-btn.active {
+  border-color: #4a6cf7;
+  background: #4a6cf7;
+  color: #fff;
+}
+
+/* ============== Вторичная навигация ============== */
+.secondary-nav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.tab {
+  padding: 10px 18px;
+  border: none;
+  background: #eef1f8;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s;
+  margin: 0;
+}
+
+.tab:hover { background: #dde4f5; }
+.tab.active { background: #4a6cf7; color: #fff; }
+
+/* ============== Панели ============== */
+.panel { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
+.panel.active { display: block; }
+.panel h2 { margin-top: 0; font-size: 22px; color: #2a2e3a; }
+
+.back-to-exams {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: #eef1f8;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2a2e3a;
+  margin-bottom: 16px;
+  transition: background 0.15s;
+}
+
+.back-to-exams:hover { background: #dde4f5; }
+
+/* ============== Формы (общий стиль для input, select, textarea) ============== */
+label { display: block; margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #444; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccd2e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  height: 42px;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #4a6cf7;
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
+}
+
+textarea {
+  height: auto;
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* Стилизация выпадающих списков */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+/* ============== Кнопки ============== */
+button.action {
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: #4a6cf7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+button.action:hover { background: #3a56d4; }
+
+button.copy {
+  background: #eef1f8;
+  color: #2a2e3a;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+button.copy:hover { background: #dde4f5; }
+
+/* ============== Карточки ============== */
 .card {
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin-top: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border-left: 4px solid #4a6cf7;
   animation: fadeIn 0.3s ease-in;
 }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.pretty-list {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #2a2e3a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
+
+.card ul { margin: 0; padding-left: 20px; }
+.card li { margin-bottom: 6px; }
+.card .empty { color: #999; font-style: italic; margin: 0; }
+.card small { color: #888; font-size: 12px; display: block; margin-top: 6px; }
+
+/* ============== Красивые списки и текст ============== */
+.pretty-list { list-style: none; padding-left: 0; margin: 0; }
+
 .pretty-list li {
   padding: 10px 14px 10px 36px;
   margin-bottom: 6px;
@@ -76,9 +263,9 @@ header { position: relative; }
   line-height: 1.5;
   transition: background 0.15s;
 }
-.pretty-list li:hover {
-  background: #eef1f8;
-}
+
+.pretty-list li:hover { background: #eef1f8; }
+
 .pretty-list li::before {
   content: "▸";
   position: absolute;
@@ -96,11 +283,32 @@ header { position: relative; }
   white-space: pre-wrap;
 }
 
-/* Пустые состояния */
-.card p.empty {
-  background: #fff8e1;
-  color: #b8860b;
-  padding: 10px 14px;
-  border-radius: 6px;
-  border-left: 3px solid #f0b429;
+/* ============== Загрузка ============== */
+.loading-box {
+  display: flex;
+  align-items: center;
+  color: #4a6cf7;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #4a6cf7;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#tasks, #essayOut, #planOut, #pfOut, #historyOut { margin-top: 16px; }
+
+/* ============== Адаптив ============== */
+@media (max-width: 640px) {
+  .exam-switcher { grid-template-columns: 1fr; }
+  .version-switcher { flex-direction: column; }
 }
