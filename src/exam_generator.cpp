@@ -81,53 +81,73 @@ json ExamGenerator::generateReading(const std::string& exam,
                                     const std::string& section,
                                     const std::string& difficulty,
                                     const std::string& lang) const {
-    bool is_sat = (exam == "SAT");
-
     std::string system;
-    if (lang == "ru") {
-        system =
-            "Ты — составитель заданий для экзамена IELTS/TOEFL/SAT. "
-            "Твоя задача — придумать ОДНО задание на чтение в стиле официального экзамена. "
-            "Отвечай ТОЛЬКО валидным JSON-объектом. Ответ начинается с '{' и заканчивается на '}'. "
-            "Без markdown, без пояснений. "
-            "Ключи: "
-            "{\"passage\":\"текст на английском 300-500 слов\", "
-            "\"questions\":["
-            "{\"q\":\"вопрос на английском\", "
-            "\"type\":\"multiple_choice\" или \"true_false_not_given\", "
-            "\"options\":[\"A\",\"B\",\"C\",\"D\"], "
-            "\"answer\":\"A\"}], "
-            "\"tips\":[\"совет на русском\", \"совет на русском\"]}. "
-            "Весь текст passage и вопросы — строго на английском. "
-            "Поле tips — строго на русском, НЕ используй китайский. "
-            "Сделай 5 вопросов.";
+    
+    // === ФОРМИРУЕМ ПРОМПТ ПОД КОНКРЕТНЫЙ ЭКЗАМЕН ===
+    if (exam == "IELTS") {
+        if (lang == "ru") {
+            system = 
+                "Ты — создатель заданий для IELTS Reading. "
+                "Придумай ОДИН академический текст (400-600 слов) на английском языке на любую научную или социальную тему. "
+                "К тексту придумай 5 вопросов (True/False/Not Given или Multiple Choice). "
+                "Отвечай строго в JSON формате: "
+                "{\"passage\":\"текст\", \"questions\":[{\"q\":\"вопрос\", \"type\":\"multiple_choice\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer\":\"A\"}], \"tips\":[\"совет на русском\"]}. "
+                "Весь текст и вопросы — на английском. Советы — на русском. НЕ используй китайский.";
+        } else {
+            system = 
+                "You are an IELTS Reading task creator. "
+                "Invent ONE academic passage (400-600 words) in English on a scientific or social topic. "
+                "Create 5 questions (True/False/Not Given or Multiple Choice). "
+                "Respond ONLY with valid JSON: "
+                "{\"passage\":\"text\", \"questions\":[{\"q\":\"question\", \"type\":\"multiple_choice\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer\":\"A\"}], \"tips\":[\"tip in English\"]}. "
+                "All text and questions in English.";
+        }
+    } else if (exam == "TOEFL") {
+        if (lang == "ru") {
+            system = 
+                "Ты — создатель заданий для TOEFL Reading. "
+                "Придумай ОДИН университетский текст (500-700 слов) на английском языке на тему биологии, истории или астрономии. "
+                "К тексту придумай 5 вопросов (Multiple Choice). "
+                "Отвечай строго в JSON формате: "
+                "{\"passage\":\"текст\", \"questions\":[{\"q\":\"вопрос\", \"type\":\"multiple_choice\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer\":\"A\"}], \"tips\":[\"совет на русском\"]}. "
+                "Весь текст и вопросы — на английском. Советы — на русском. НЕ используй китайский.";
+        } else {
+            system = 
+                "You are a TOEFL Reading task creator. "
+                "Invent ONE university-level passage (500-700 words) in English on biology, history, or astronomy. "
+                "Create 5 Multiple Choice questions. "
+                "Respond ONLY with valid JSON: "
+                "{\"passage\":\"text\", \"questions\":[{\"q\":\"question\", \"type\":\"multiple_choice\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer\":\"A\"}], \"tips\":[\"tip in English\"]}. "
+                "All text and questions in English.";
+        }
+    } else if (exam == "SAT") {
+        if (lang == "ru") {
+            system = 
+                "Ты — создатель заданий для Digital SAT Reading & Writing. "
+                "Придумай ОДИН короткий текст (100-150 слов) на английском языке на тему литературы, истории или науки. "
+                "К тексту придумай 1 вопрос с 4 вариантами ответа. "
+                "Отвечай строго в JSON формате: "
+                "{\"passage\":\"текст\", \"questions\":[{\"q\":\"вопрос\", \"type\":\"multiple_choice\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer\":\"A\"}], \"tips\":[\"совет на русском\"]}. "
+                "Весь текст и вопросы — на английском. Советы — на русском. НЕ используй китайский.";
+        } else {
+            system = 
+                "You are a Digital SAT Reading & Writing task creator. "
+                "Invent ONE short passage (100-150 words) in English on literature, history, or science. "
+                "Create 1 Multiple Choice question with 4 options. "
+                "Respond ONLY with valid JSON: "
+                "{\"passage\":\"text\", \"questions\":[{\"q\":\"question\", \"type\":\"multiple_choice\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer\":\"A\"}], \"tips\":[\"tip in English\"]}. "
+                "All text and questions in English.";
+        }
     } else {
-        system =
-            "You are an IELTS/TOEFL/SAT reading task creator. "
-            "Invent ONE reading passage with 5 questions in the style of the official exam. "
-            "Respond ONLY with a valid JSON object. Start with '{' and end with '}'. "
-            "No markdown, no commentary. "
-            "Keys: "
-            "{\"passage\":\"English text 300-500 words\", "
-            "\"questions\":["
-            "{\"q\":\"question in English\", "
-            "\"type\":\"multiple_choice\" or \"true_false_not_given\", "
-            "\"options\":[\"A\",\"B\",\"C\",\"D\"], "
-            "\"answer\":\"A\"}], "
-            "\"tips\":[\"tip in English\"]}. "
-            "All text must be in English. All 5 questions in English.";
+        // Fallback
+        system = "You are an English exam task creator. Respond ONLY with valid JSON: {\"passage\":\"text\", \"questions\":[], \"tips\":[]}.";
     }
 
     std::ostringstream user;
     user << "Exam: " << exam << "\n";
     user << "Section: " << section << "\n";
     user << "Difficulty: " << difficulty << "\n";
-    if (is_sat) {
-        user << "Format: short passage (100-200 words) with 2 multiple-choice questions.\n";
-    } else {
-        user << "Format: long passage (400-600 words) with 5 questions.\n";
-    }
-    user << "\nGenerate ONE reading exercise. Return ONLY the JSON object.";
+    user << "\nGenerate ONE reading exercise matching the format above. Return ONLY the JSON object.";
 
     std::string raw;
     try {
@@ -240,6 +260,102 @@ json ExamGenerator::generateSpeaking(const std::string& exam,
     result["questions"]    = j.value("questions", json::array());
     result["time_prep"]    = j.value("time_prep", 1);
     result["time_speak"]   = j.value("time_speak", 2);
+    result["tips"]         = j.value("tips", json::array());
+    return result;
+}
+json ExamGenerator::generateListening(const std::string& exam,
+                                      const std::string& section,
+                                      const std::string& difficulty,
+                                      const std::string& lang) const {
+    std::string system;
+    
+    if (exam == "IELTS") {
+        if (lang == "ru") {
+            system = 
+                "Ты — создатель заданий для IELTS Listening. "
+                "Придумай ОДИН короткий диалог (100-150 слов) на английском языке на бытовую тему. "
+                "К диалогу придумай 3 вопроса (Multiple Choice). "
+                "Отвечай строго в JSON формате. Начинай с '{' и заканчивай '}'. "
+                "Пример: {\"transcript\":\"A: Hello... B: Hi...\", \"questions\":[{\"q\":\"What is the man booking?\", \"options\":[\"A hotel\",\"A flight\"], \"answer\":\"A hotel\"}], \"time_minutes\":20, \"tips\":[\"Слушай ключевые слова\"]}. "
+                "Весь текст и вопросы — на английском. Советы — на русском. НЕ используй китайский.";
+        } else {
+            system = 
+                "You are an IELTS Listening task creator. "
+                "Invent ONE short dialogue (100-150 words) in English on an everyday topic. "
+                "Create 3 Multiple Choice questions. "
+                "Respond ONLY with valid JSON. Start with '{' and end with '}'. "
+                "Example: {\"transcript\":\"A: Hello... B: Hi...\", \"questions\":[{\"q\":\"What is the man booking?\", \"options\":[\"A hotel\",\"A flight\"], \"answer\":\"A hotel\"}], \"time_minutes\":20, \"tips\":[\"Listen for key words\"]}. "
+                "All text and questions in English.";
+        }
+    } else if (exam == "TOEFL") {
+        if (lang == "ru") {
+            system = 
+                "Ты — создатель заданий для TOEFL Listening. "
+                "Придумай ОДНУ короткую лекцию (150-200 слов) на английском языке на тему биологии или истории. "
+                "К лекции придумай 3 вопроса (Multiple Choice). "
+                "Отвечай строго в JSON формате. Начинай с '{' и заканчивай '}'. "
+                "Пример: {\"transcript\":\"Today we will discuss...\", \"questions\":[{\"q\":\"What is the main topic?\", \"options\":[\"Biology\",\"History\"], \"answer\":\"Biology\"}], \"time_minutes\":20, \"tips\":[\"Записывай ключевые термины\"]}. "
+                "Весь текст и вопросы — на английском. Советы — на русском. НЕ используй китайский.";
+        } else {
+            system = 
+                "You are a TOEFL Listening task creator. "
+                "Invent ONE short lecture (150-200 words) in English on biology or history. "
+                "Create 3 Multiple Choice questions. "
+                "Respond ONLY with valid JSON. Start with '{' and end with '}'. "
+                "Example: {\"transcript\":\"Today we will discuss...\", \"questions\":[{\"q\":\"What is the main topic?\", \"options\":[\"Biology\",\"History\"], \"answer\":\"Biology\"}], \"time_minutes\":20, \"tips\":[\"Note key terms\"]}. "
+                "All text and questions in English.";
+        }
+    } else {
+        system = "You are an English exam task creator. Respond ONLY with valid JSON: {\"transcript\":\"text\", \"questions\":[], \"tips\":[]}.";
+    }
+
+    std::ostringstream user;
+    user << "Exam: " << exam << "\n";
+    user << "Section: " << section << "\n";
+    user << "Difficulty: " << difficulty << "\n";
+    user << "\nGenerate ONE listening exercise matching the format above. Return ONLY the JSON object.";
+
+    std::string raw;
+    try {
+        raw = llm_.chat(system, user.str());
+    } catch (std::exception&) {
+        return json{{"error", "LLM request failed"}};
+    }
+
+    auto start = raw.find('{');
+    auto end   = raw.rfind('}');
+    if (start == std::string::npos || end == std::string::npos || end <= start) {
+        return json{{"error", "LLM returned non-JSON"}, {"raw", raw.substr(0, 500)}};
+    }
+    raw = raw.substr(start, end - start + 1);
+
+    // === УМНЫЙ ПАРСЕР ===
+    auto j = json::parse(raw, nullptr, false);
+    
+    // Если строгий парсер упал, пробуем починить частые ошибки LLM
+    if (j.is_discarded()) {
+        std::string fixed = raw;
+        // 1. Удаляем висячие запятые перед } или ]
+        size_t pos;
+        while ((pos = fixed.find(",}")) != std::string::npos) fixed.replace(pos, 2, "}");
+        while ((pos = fixed.find(",]")) != std::string::npos) fixed.replace(pos, 2, "]");
+        
+        j = json::parse(fixed, nullptr, false);
+    }
+
+    if (j.is_discarded() || !j.is_object()) {
+        return json{{"error", "JSON parse failed"}, {"raw", raw.substr(0, 500)}};
+    }
+    // ====================
+
+    json result;
+    result["type"]         = "listening";
+    result["exam"]         = exam;
+    result["section"]      = section;
+    result["difficulty"]   = difficulty;
+    result["transcript"]   = j.value("transcript", "");
+    result["questions"]    = j.value("questions", json::array());
+    result["time_minutes"] = j.value("time_minutes", 20);
     result["tips"]         = j.value("tips", json::array());
     return result;
 }

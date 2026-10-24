@@ -187,7 +187,7 @@ function setLang(lang) {
 }
 
 // ============================================================
-// ВКЛАДКИ (только вторичные)
+// ВКЛАДКИ
 // ============================================================
 document.querySelectorAll(".tab").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -429,6 +429,7 @@ async function generateExam() {
       out.appendChild(box);
       return;
     }
+    
     if (data.type === "reading") {
       const box = el("div", "card");
       box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
@@ -446,7 +447,6 @@ async function generateExam() {
           q.options.forEach(opt => opts.appendChild(el("li", null, opt)));
           qBox.appendChild(opts);
         }
-        // Ответ спрятан
         if (q.answer) {
           const det = el("details");
           const sum = el("summary", "copy", currentLang === "ru" ? "Показать ответ" : "Show answer");
@@ -465,6 +465,7 @@ async function generateExam() {
       out.appendChild(box);
       return;
     }
+    
     if (data.type === "speaking") {
       const box = el("div", "card");
       box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
@@ -492,6 +493,79 @@ async function generateExam() {
         if (data.time_prep)  meta.push("⏱ " + (currentLang === "ru" ? "Подготовка: " : "Prep: ") + data.time_prep + " min");
         if (data.time_speak) meta.push("🎤 " + (currentLang === "ru" ? "Ответ: " : "Speak: ") + data.time_speak + " min");
         box.appendChild(el("small", null, meta.join("  ·  ")));
+      }
+
+      if (data.tips && data.tips.length) {
+        box.appendChild(renderList("💡 " + (currentLang === "ru" ? "Советы" : "Tips"), data.tips));
+      }
+
+      out.appendChild(box);
+      return;
+    }
+
+    if (data.type === "listening") {
+      const box = el("div", "card");
+      box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
+
+      // === АУДИО ===
+      const audioTitle = el("h3", null, "🎧 " + (currentLang === "ru" ? "Аудио" : "Audio"));
+      box.appendChild(audioTitle);
+
+      const playBtn = el("button", "action", currentLang === "ru" ? "▶ Воспроизвести транскрипт" : "▶ Play transcript");
+      playBtn.style.marginTop = "0";
+      playBtn.onclick = () => {
+        if (!window.speechSynthesis) {
+          alert(currentLang === "ru" ? "Браузер не поддерживает синтез речи" : "Browser does not support speech synthesis");
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(data.transcript);
+        utterance.lang = "en-US";
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+        playBtn.textContent = currentLang === "ru" ? "🔊 Воспроизводится..." : "🔊 Playing...";
+        utterance.onend = () => {
+          playBtn.textContent = currentLang === "ru" ? "▶ Воспроизвести транскрипт" : "▶ Play transcript";
+        };
+      };
+      box.appendChild(playBtn);
+
+      // === СКРЫТЫЙ ТРАНСКРИПТ ===
+      const transcriptDetails = el("details");
+      const transcriptSummary = el("summary", "copy", currentLang === "ru" ? "▶ Показать текст транскрипта" : "▶ Show transcript text");
+      transcriptSummary.style.cursor = "pointer";
+      transcriptSummary.style.marginTop = "12px";
+      transcriptDetails.appendChild(transcriptSummary);
+
+      const transcriptText = el("p", "pretty-text", data.transcript);
+      transcriptText.style.marginTop = "8px";
+      transcriptDetails.appendChild(transcriptText);
+      box.appendChild(transcriptDetails);
+
+      // === ВОПРОСЫ ===
+      box.appendChild(el("h3", null, "❓ " + (currentLang === "ru" ? "Вопросы" : "Questions")));
+
+      (data.questions || []).forEach((q, i) => {
+        const qBox = el("div", "pretty-text");
+        qBox.appendChild(el("p", null, (i + 1) + ". " + (q.q || "")));
+        if (q.options && q.options.length) {
+          const opts = el("ul", "pretty-list");
+          q.options.forEach(opt => opts.appendChild(el("li", null, opt)));
+          qBox.appendChild(opts);
+        }
+        if (q.answer) {
+          const det = el("details");
+          const sum = el("summary", "copy", currentLang === "ru" ? "Показать ответ" : "Show answer");
+          sum.style.cursor = "pointer";
+          det.appendChild(sum);
+          det.appendChild(el("p", null, "✅ " + q.answer));
+          qBox.appendChild(det);
+        }
+        box.appendChild(qBox);
+      });
+
+      if (data.time_minutes) {
+        box.appendChild(el("small", null, "⏱ " + data.time_minutes + " min"));
       }
 
       if (data.tips && data.tips.length) {
