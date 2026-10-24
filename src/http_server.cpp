@@ -213,6 +213,11 @@ void ApiServer::run() {
                 history_.log("u1", "exam_generate", body, result);
                 return send_json(res, result);
             }
+            if (section.find("Math") != std::string::npos) {
+                auto result = exam_gen_.generateMath(exam, section, difficulty, lang);
+                history_.log("u1", "exam_generate", body, result);
+                return send_json(res, result);
+            }
 
             // Пока только Writing Task 2 — остальное следующим этапом
             return send_json(res, {

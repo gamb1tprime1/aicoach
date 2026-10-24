@@ -575,6 +575,37 @@ async function generateExam() {
       out.appendChild(box);
       return;
     }
+    if (data.type === "math") {
+      const box = el("div", "card");
+      box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
+
+      if (data.topic) {
+        box.appendChild(el("small", null, "📌 " + data.topic));
+      }
+
+      box.appendChild(el("p", "pretty-text", data.question));
+
+      if (data.options && data.options.length) {
+        const opts = el("ul", "pretty-list");
+        data.options.forEach(opt => opts.appendChild(el("li", null, opt)));
+        box.appendChild(opts);
+      }
+
+      if (data.answer) {
+        const det = el("details");
+        const sum = el("summary", "copy", currentLang === "ru" ? "Показать ответ" : "Show answer");
+        sum.style.cursor = "pointer";
+        det.appendChild(sum);
+        det.appendChild(el("p", null, "✅ " + data.answer));
+        if (data.explanation) {
+          det.appendChild(el("p", "pretty-text", "💡 " + data.explanation));
+        }
+        box.appendChild(det);
+      }
+
+      out.appendChild(box);
+      return;
+    }
 
     out.textContent = t("nothing_found");
   } catch (e) {

@@ -21,8 +21,7 @@ json ExamGenerator::generateEssay(const std::string& exam,
             "\"topic\":\"краткая тема на английском\", "
             "\"tips\":[\"совет1\", \"совет2\", \"совет3\"]}. "
             "Поле prompt — на английском (экзамен на английском). "
-            "Поле tips — строго на русском. НЕ используй китайский, японский или другие языки. "
-            "Только русский текст в tips.";
+            "Поле tips — строго на русском. НЕ используй китайский.";
     } else {
         system =
             "You are an IELTS/TOEFL/SAT task creator. "
@@ -35,7 +34,6 @@ json ExamGenerator::generateEssay(const std::string& exam,
             "\"time_minutes\":number, "
             "\"topic\":\"short topic in English\", "
             "\"tips\":[\"tip1\", \"tip2\", \"tip3\"]}.";
-            " All text must be in English only. Do NOT use Chinese, Japanese, or any other language.";
     }
 
     std::ostringstream user;
@@ -51,7 +49,6 @@ json ExamGenerator::generateEssay(const std::string& exam,
         return json{{"error", "LLM request failed"}};
     }
 
-    // Найти границы объекта {...}
     auto start = raw.find('{');
     auto end   = raw.rfind('}');
     if (start == std::string::npos || end == std::string::npos || end <= start) {
@@ -60,11 +57,17 @@ json ExamGenerator::generateEssay(const std::string& exam,
     raw = raw.substr(start, end - start + 1);
 
     auto j = json::parse(raw, nullptr, false);
+    if (j.is_discarded()) {
+        std::string fixed = raw;
+        size_t pos;
+        while ((pos = fixed.find(",}")) != std::string::npos) fixed.replace(pos, 2, "}");
+        while ((pos = fixed.find(",]")) != std::string::npos) fixed.replace(pos, 2, "]");
+        j = json::parse(fixed, nullptr, false);
+    }
     if (j.is_discarded() || !j.is_object()) {
         return json{{"error", "JSON parse failed"}, {"raw", raw.substr(0, 500)}};
     }
 
-    // Приводим к единому формату
     json result;
     result["type"]       = "essay";
     result["exam"]       = exam;
@@ -77,13 +80,13 @@ json ExamGenerator::generateEssay(const std::string& exam,
     result["tips"]       = j.value("tips", json::array());
     return result;
 }
+
 json ExamGenerator::generateReading(const std::string& exam,
                                     const std::string& section,
                                     const std::string& difficulty,
                                     const std::string& lang) const {
     std::string system;
     
-    // === ФОРМИРУЕМ ПРОМПТ ПОД КОНКРЕТНЫЙ ЭКЗАМЕН ===
     if (exam == "IELTS") {
         if (lang == "ru") {
             system = 
@@ -139,7 +142,6 @@ json ExamGenerator::generateReading(const std::string& exam,
                 "All text and questions in English.";
         }
     } else {
-        // Fallback
         system = "You are an English exam task creator. Respond ONLY with valid JSON: {\"passage\":\"text\", \"questions\":[], \"tips\":[]}.";
     }
 
@@ -164,6 +166,13 @@ json ExamGenerator::generateReading(const std::string& exam,
     raw = raw.substr(start, end - start + 1);
 
     auto j = json::parse(raw, nullptr, false);
+    if (j.is_discarded()) {
+        std::string fixed = raw;
+        size_t pos;
+        while ((pos = fixed.find(",}")) != std::string::npos) fixed.replace(pos, 2, "}");
+        while ((pos = fixed.find(",]")) != std::string::npos) fixed.replace(pos, 2, "]");
+        j = json::parse(fixed, nullptr, false);
+    }
     if (j.is_discarded() || !j.is_object()) {
         return json{{"error", "JSON parse failed"}, {"raw", raw.substr(0, 500)}};
     }
@@ -178,6 +187,7 @@ json ExamGenerator::generateReading(const std::string& exam,
     result["tips"]       = j.value("tips", json::array());
     return result;
 }
+
 json ExamGenerator::generateSpeaking(const std::string& exam,
                                      const std::string& section,
                                      const std::string& difficulty,
@@ -246,6 +256,13 @@ json ExamGenerator::generateSpeaking(const std::string& exam,
     raw = raw.substr(start, end - start + 1);
 
     auto j = json::parse(raw, nullptr, false);
+    if (j.is_discarded()) {
+        std::string fixed = raw;
+        size_t pos;
+        while ((pos = fixed.find(",}")) != std::string::npos) fixed.replace(pos, 2, "}");
+        while ((pos = fixed.find(",]")) != std::string::npos) fixed.replace(pos, 2, "]");
+        j = json::parse(fixed, nullptr, false);
+    }
     if (j.is_discarded() || !j.is_object()) {
         return json{{"error", "JSON parse failed"}, {"raw", raw.substr(0, 500)}};
     }
@@ -263,6 +280,7 @@ json ExamGenerator::generateSpeaking(const std::string& exam,
     result["tips"]         = j.value("tips", json::array());
     return result;
 }
+
 json ExamGenerator::generateListening(const std::string& exam,
                                       const std::string& section,
                                       const std::string& difficulty,
@@ -329,24 +347,17 @@ json ExamGenerator::generateListening(const std::string& exam,
     }
     raw = raw.substr(start, end - start + 1);
 
-    // === УМНЫЙ ПАРСЕР ===
     auto j = json::parse(raw, nullptr, false);
-    
-    // Если строгий парсер упал, пробуем починить частые ошибки LLM
     if (j.is_discarded()) {
         std::string fixed = raw;
-        // 1. Удаляем висячие запятые перед } или ]
         size_t pos;
         while ((pos = fixed.find(",}")) != std::string::npos) fixed.replace(pos, 2, "}");
         while ((pos = fixed.find(",]")) != std::string::npos) fixed.replace(pos, 2, "]");
-        
         j = json::parse(fixed, nullptr, false);
     }
-
     if (j.is_discarded() || !j.is_object()) {
         return json{{"error", "JSON parse failed"}, {"raw", raw.substr(0, 500)}};
     }
-    // ====================
 
     json result;
     result["type"]         = "listening";
@@ -357,5 +368,98 @@ json ExamGenerator::generateListening(const std::string& exam,
     result["questions"]    = j.value("questions", json::array());
     result["time_minutes"] = j.value("time_minutes", 20);
     result["tips"]         = j.value("tips", json::array());
+    return result;
+}
+
+json ExamGenerator::generateMath(const std::string& exam,
+                                 const std::string& section,
+                                 const std::string& difficulty,
+                                 const std::string& lang) const {
+    std::string system;
+    
+    if (lang == "ru") {
+        system = 
+            "Ты — создатель заданий по математике для SAT. "
+            "Придумай ОДНУ задачу. "
+            "Отвечай строго по шаблону, БЕЗ JSON, БЕЗ фигурных скобок: "
+            "ВОПРОС: [текст задачи на английском] "
+            "ВАРИАНТЫ: [A) ..., B) ..., C) ..., D) ...] "
+            "ОТВЕТ: [правильная буква] "
+            "ОБЪЯСНЕНИЕ: [краткое решение на русском] "
+            "ТЕМА: [тема на английском]";
+    } else {
+        system = 
+            "You are a SAT Math task creator. "
+            "Invent ONE math problem. "
+            "Respond strictly in this format, NO JSON, NO curly braces: "
+            "ВОПРОС: [problem text in English] "
+            "ВАРИАНТЫ: [A) ..., B) ..., C) ..., D) ...] "
+            "ОТВЕТ: [correct letter] "
+            "ОБЪЯСНЕНИЕ: [brief solution in English] "
+            "ТЕМА: [topic in English]";
+    }
+
+    std::ostringstream user;
+    user << "Exam: " << exam << "\n";
+    user << "Section: " << section << "\n";
+    user << "Difficulty: " << difficulty << "\n";
+    user << "\nGenerate ONE math problem.";
+
+    std::string raw;
+    try {
+        raw = llm_.chat(system, user.str());
+    } catch (std::exception&) {
+        return json{{"error", "LLM request failed"}};
+    }
+
+    // Ручной парсинг текста (без JSON)
+    auto get_field = [&](const std::string& key1, const std::string& key2) -> std::string {
+        size_t start = raw.find(key1);
+        if (start == std::string::npos) start = raw.find(key2);
+        if (start == std::string::npos) return "";
+        start += (raw.find(key1) != std::string::npos ? key1.length() : key2.length());
+        
+        size_t end = std::string::npos;
+        const char* next_keys[] = {"ВОПРОС", "ВАРИАНТЫ", "ОТВЕТ", "ОБЪЯСНЕНИЕ", "ТЕМА"};
+        for (const char* nk : next_keys) {
+            size_t pos = raw.find(nk, start);
+            if (pos != std::string::npos && (end == std::string::npos || pos < end)) {
+                end = pos;
+            }
+        }
+        std::string res = raw.substr(start, end - start);
+        
+        // Очистка от лишних символов
+        res.erase(0, res.find_first_not_of(" \t\n\r:{}[]\"'"));
+        res.erase(res.find_last_not_of(" \t\n\r:{}[]\"'") + 1);
+        return res;
+    };
+
+    std::string question = get_field("ВОПРОС:", "QUESTION:");
+    std::string options_str = get_field("ВАРИАНТЫ:", "OPTIONS:");
+    std::string answer = get_field("ОТВЕТ:", "ANSWER:");
+    std::string explanation = get_field("ОБЪЯСНЕНИЕ:", "EXPLANATION:");
+    std::string topic = get_field("ТЕМА:", "TOPIC:");
+
+    // Разбиваем варианты на массив
+    json options_arr = json::array();
+    std::stringstream ss(options_str);
+    std::string item;
+    while (std::getline(ss, item, ',')) {
+        item.erase(0, item.find_first_not_of(" \t\n\r"));
+        item.erase(item.find_last_not_of(" \t\n\r") + 1);
+        if (!item.empty()) options_arr.push_back(item);
+    }
+
+    json result;
+    result["type"]        = "math";
+    result["exam"]        = exam;
+    result["section"]     = section;
+    result["difficulty"]  = difficulty;
+    result["question"]    = question;
+    result["options"]     = options_arr;
+    result["answer"]      = answer;
+    result["explanation"] = explanation;
+    result["topic"]       = topic;
     return result;
 }
