@@ -17,11 +17,14 @@ add_executable(aicoach
     src/http_server.cpp
     src/history_db.cpp
     src/task_generator.cpp
+    src/exam_generator.cpp
 )
+
 target_link_libraries(aicoach PRIVATE
     CURL::libcurl
     nlohmann_json::nlohmann_json
     SQLite::SQLite3
     ws2_32
 )
+
 target_include_directories(aicoach PRIVATE include)

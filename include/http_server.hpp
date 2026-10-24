@@ -6,6 +6,7 @@
 #include "study_planner.hpp"
 #include "history_db.hpp"
 #include "task_generator.hpp"
+#include "exam_generator.hpp"
 
 class ApiServer {
 public:
@@ -27,4 +28,5 @@ private:
         StudyPlanner planner_;
     HistoryDB history_;
     TaskGenerator generator_;
+    ExamGenerator exam_gen_;
 };

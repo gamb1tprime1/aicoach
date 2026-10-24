@@ -392,33 +392,45 @@ async function generateExam() {
   const exam       = currentExam;
   const section    = document.getElementById("section").value;
   const difficulty = document.getElementById("difficulty").value;
-  const countInput = document.getElementById("count");
-  const count      = countInput ? (parseInt(countInput.value) || 5) : 5;
 
   try {
     const payload = {
       exam: exam,
       section: section,
       difficulty: difficulty,
-      count: count,
+      count: 1,
       lang: currentLang
     };
     if (exam === "IELTS") payload.ielts_version = ieltsVersion;
 
-    const data = await post("/api/tasks/generate", payload);
+    const data = await post("/api/exam/generate", payload);
     out.innerHTML = "";
+
     if (data.error) {
-      out.textContent = "❌ " + data.error;
+      out.textContent = "❌ " + data.error + (data.hint ? "\n\n" + data.hint : "");
       return;
     }
-    if (!data.tasks || !data.tasks.length) {
-      out.textContent = t("nothing_found");
+
+    if (data.type === "essay") {
+      const box = el("div", "card");
+      box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
+      box.appendChild(el("p", "pretty-text", data.prompt));
+
+      const meta = [];
+      if (data.topic)        meta.push("📌 " + data.topic);
+      if (data.min_words)    meta.push("✍️ min " + data.min_words + " words");
+      if (data.time_minutes) meta.push("⏱ " + data.time_minutes + " min");
+      if (meta.length) box.appendChild(el("small", null, meta.join("  ·  ")));
+
+      if (data.tips && data.tips.length) {
+        box.appendChild(renderList("💡 " + (currentLang === "ru" ? "Советы" : "Tips"), data.tips));
+      }
+
+      out.appendChild(box);
       return;
     }
-    if (data.fallback) {
-      out.appendChild(el("p", "empty", t("gen_fallback")));
-    }
-    data.tasks.forEach(item => out.appendChild(renderTaskCard(item)));
+
+    out.textContent = t("nothing_found");
   } catch (e) {
     out.innerHTML = "";
     out.textContent = "❌ " + e.message;

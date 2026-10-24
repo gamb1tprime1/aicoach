@@ -15,7 +15,8 @@ ApiServer::ApiServer(const std::string& host, int port,
       llm_(llm_url, llm_key, model),
       essay_(llm_), portfolio_(llm_), planner_(llm_),
       history_(data_dir + "/history.db"),
-      generator_(llm_, tasks_) {
+      generator_(llm_, tasks_),
+      exam_gen_(llm_) {
     tasks_.load_from_dir(data_dir + "/tasks");
 }
 
@@ -177,6 +178,33 @@ void ApiServer::run() {
                 return send_json(res, {{"tasks", out}, {"fallback", true}});
             }
             send_json(res, {{"tasks", tasks}, {"fallback", false}});
+        } catch (std::exception& ex) {
+            send_json(res, {{"error", ex.what()}}, 500);
+        }
+    });
+    svr.Post("/api/exam/generate", [&](const httplib::Request& req, httplib::Response& res) {
+        auto body = json::parse(req.body, nullptr, false);
+        if (body.is_discarded()) return send_json(res, {{"error", "bad json"}}, 400);
+
+        std::string exam       = body.value("exam", "IELTS");
+        std::string ielts_ver  = body.value("ielts_version", "academic");
+        std::string section    = body.value("section", "");
+        std::string difficulty = body.value("difficulty", "band7");
+        std::string lang       = body.value("lang", "en");
+
+        try {
+            if (section.find("Writing Task 2") != std::string::npos) {
+                auto result = exam_gen_.generateEssay(exam, section, difficulty, lang);
+                history_.log("u1", "exam_generate", body, result);
+                return send_json(res, result);
+            }
+
+            // Пока только Writing Task 2 — остальное следующим этапом
+            return send_json(res, {
+                {"error", "Section not yet supported: " + section},
+                {"hint", "Currently only 'Writing Task 2' is available"}
+            }, 400);
+
         } catch (std::exception& ex) {
             send_json(res, {{"error", ex.what()}}, 500);
         }
