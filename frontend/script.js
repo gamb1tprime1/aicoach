@@ -429,6 +429,42 @@ async function generateExam() {
       out.appendChild(box);
       return;
     }
+    if (data.type === "reading") {
+      const box = el("div", "card");
+      box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
+
+      box.appendChild(el("h3", null, "📖 " + (currentLang === "ru" ? "Текст" : "Passage")));
+      box.appendChild(el("p", "pretty-text", data.passage));
+
+      box.appendChild(el("h3", null, "❓ " + (currentLang === "ru" ? "Вопросы" : "Questions")));
+
+      (data.questions || []).forEach((q, i) => {
+        const qBox = el("div", "pretty-text");
+        qBox.appendChild(el("p", null, (i + 1) + ". " + (q.q || "")));
+        if (q.options && q.options.length) {
+          const opts = el("ul", "pretty-list");
+          q.options.forEach(opt => opts.appendChild(el("li", null, opt)));
+          qBox.appendChild(opts);
+        }
+        // Ответ спрятан
+        if (q.answer) {
+          const det = el("details");
+          const sum = el("summary", "copy", currentLang === "ru" ? "Показать ответ" : "Show answer");
+          sum.style.cursor = "pointer";
+          det.appendChild(sum);
+          det.appendChild(el("p", null, "✅ " + q.answer));
+          qBox.appendChild(det);
+        }
+        box.appendChild(qBox);
+      });
+
+      if (data.tips && data.tips.length) {
+        box.appendChild(renderList("💡 " + (currentLang === "ru" ? "Советы" : "Tips"), data.tips));
+      }
+
+      out.appendChild(box);
+      return;
+    }
 
     out.textContent = t("nothing_found");
   } catch (e) {
