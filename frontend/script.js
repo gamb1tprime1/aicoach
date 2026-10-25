@@ -384,28 +384,7 @@ function setIeltsVersion(version) {
   setExam("IELTS");
 }
 
-async function generateExam() {
-  const out = document.getElementById("tasks");
-  out.innerHTML = "";
-  out.appendChild(loadingBox("loading"));
-
-  const exam       = currentExam;
-  const section    = document.getElementById("section").value;
-  const difficulty = document.getElementById("difficulty").value;
-
-  try {
-    const payload = {
-      exam: exam,
-      section: section,
-      difficulty: difficulty,
-      count: 1,
-      lang: currentLang
-    };
-    if (exam === "IELTS") payload.ielts_version = ieltsVersion;
-
-    const data = await post("/api/exam/generate", payload);
-    out.innerHTML = "";
-
+function renderExamItem(data, out) {
     if (data.error) {
       out.textContent = "❌ " + data.error + (data.hint ? "\n\n" + data.hint : "");
       return;
@@ -507,7 +486,6 @@ async function generateExam() {
       const box = el("div", "card");
       box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
 
-      // === АУДИО ===
       const audioTitle = el("h3", null, "🎧 " + (currentLang === "ru" ? "Аудио" : "Audio"));
       box.appendChild(audioTitle);
 
@@ -530,7 +508,6 @@ async function generateExam() {
       };
       box.appendChild(playBtn);
 
-      // === СКРЫТЫЙ ТРАНСКРИПТ ===
       const transcriptDetails = el("details");
       const transcriptSummary = el("summary", "copy", currentLang === "ru" ? "▶ Показать текст транскрипта" : "▶ Show transcript text");
       transcriptSummary.style.cursor = "pointer";
@@ -542,7 +519,6 @@ async function generateExam() {
       transcriptDetails.appendChild(transcriptText);
       box.appendChild(transcriptDetails);
 
-      // === ВОПРОСЫ ===
       box.appendChild(el("h3", null, "❓ " + (currentLang === "ru" ? "Вопросы" : "Questions")));
 
       (data.questions || []).forEach((q, i) => {
@@ -575,6 +551,7 @@ async function generateExam() {
       out.appendChild(box);
       return;
     }
+
     if (data.type === "math") {
       const box = el("div", "card");
       box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
@@ -607,7 +584,75 @@ async function generateExam() {
       return;
     }
 
-    out.textContent = t("nothing_found");
+    if (data.type === "writing_task1") {
+      const box = el("div", "card");
+      box.appendChild(el("h3", null, data.section + " [" + data.difficulty + "]"));
+
+      if (data.letter_type) {
+        const meta = ["✉️ " + (currentLang === "ru" ? "Тип: " : "Type: ") + data.letter_type];
+        if (data.recipient) meta.push((currentLang === "ru" ? "Кому: " : "To: ") + data.recipient);
+        box.appendChild(el("small", null, meta.join("  ·  ")));
+
+        if (data.purpose) {
+          box.appendChild(el("p", "pretty-text", "🎯 " + (currentLang === "ru" ? "Цель: " : "Purpose: ") + data.purpose));
+        }
+      }
+
+      if (data.chart_type) {
+        const meta = ["📊 " + data.chart_type];
+        if (data.min_words)    meta.push("✍️ min " + data.min_words + " words");
+        if (data.time_minutes) meta.push("⏱ " + data.time_minutes + " min");
+        box.appendChild(el("small", null, meta.join("  ·  ")));
+
+        if (data.chart_description) {
+          box.appendChild(el("h3", null, "📈 " + (currentLang === "ru" ? "Описание графика" : "Chart description")));
+          box.appendChild(el("p", "pretty-text", data.chart_description));
+        }
+      }
+
+      if (data.prompt) {
+        box.appendChild(el("h3", null, "✍️ " + (currentLang === "ru" ? "Задание" : "Task")));
+        box.appendChild(el("p", "pretty-text", data.prompt));
+      }
+
+      if (data.tips && data.tips.length) {
+        box.appendChild(renderList("💡 " + (currentLang === "ru" ? "Советы" : "Tips"), data.tips));
+      }
+
+      out.appendChild(box);
+      return;
+    }
+}
+
+async function generateExam() {
+  const out = document.getElementById("tasks");
+  out.innerHTML = "";
+  out.appendChild(loadingBox("loading"));
+
+  const exam       = currentExam;
+  const section    = document.getElementById("section").value;
+  const difficulty = document.getElementById("difficulty").value;
+  const countInput = document.getElementById("count");
+  const count      = countInput ? (parseInt(countInput.value) || 1) : 1;
+
+  try {
+    const payload = {
+      exam: exam,
+      section: section,
+      difficulty: difficulty,
+      count: count,
+      lang: currentLang
+    };
+    if (exam === "IELTS") payload.ielts_version = ieltsVersion;
+
+    const data = await post("/api/exam/generate", payload);
+    out.innerHTML = "";
+
+    if (Array.isArray(data)) {
+      data.forEach(item => renderExamItem(item, out));
+    } else {
+      renderExamItem(data, out);
+    }
   } catch (e) {
     out.innerHTML = "";
     out.textContent = "❌ " + e.message;
@@ -759,5 +804,5 @@ async function loadHistory() {
 // ============================================================
 document.addEventListener("DOMContentLoaded", () => {
   setLang(currentLang);
-  setIeltsVersion("academic");
+  setExam("IELTS");
 });
